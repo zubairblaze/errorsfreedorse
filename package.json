@@ -12,7 +12,8 @@
     "check": "astro check",
     "images": "node scripts/generate-images.mjs",
     "package": "npm run build && node scripts/package.mjs",
-    "fetch-fonts": "node scripts/fetch-fonts.mjs"
+    "fetch-fonts": "node scripts/fetch-fonts.mjs",
+    "package:local": "node scripts/package-local.mjs"
   },
   "dependencies": {
     "astro": "^7.2.9"

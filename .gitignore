@@ -6,3 +6,5 @@ dist/
 .env
 .env.local
 errorsfree-site.zip
+local-test/
+errorsfree-local-test.zip
