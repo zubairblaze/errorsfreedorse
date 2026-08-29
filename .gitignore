@@ -8,3 +8,7 @@ dist/
 errorsfree-site.zip
 local-test/
 errorsfree-local-test.zip
+shot*.mjs
+verify.mjs
+v2.mjs
+dbg.mjs

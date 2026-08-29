@@ -104,16 +104,51 @@ node contrast.mjs
 
 ## The Droste motif
 
-The recursion runs through the whole site rather than sitting in one hero.
-It is CSS and SVG throughout — no stacked image exports — so it stays crisp at
-any size, weighs almost nothing, and animates.
+The recursion is the site's central mechanism, not a decoration applied to
+it. It is CSS and SVG throughout — no stacked image exports — so it stays
+crisp at any size, weighs almost nothing, and is driven by scroll.
+
+### The infinite zoom
+
+`src/lib/droste.ts` is the whole engine, and it is short. A true infinite
+zoom needs only a handful of elements because the arrangement is
+self-similar: N frames whose scales are consecutive powers of `ratio`. Push
+every frame outward by the same continuous amount and, after advancing
+exactly one level, the set is indistinguishable from where it started — so a
+frame that has grown past the viewer is recycled to the centre and the loop
+has no seam.
+
+```
+depth(i, p)  = (i − p) wrapped into (−1, levels−1]
+scale        = ratio ^ depth
+opacity      = fades in at the far end, out as it engulfs the viewer
+```
+
+The recycle always happens at zero opacity, which is why it is invisible.
+Each frame's *screen is transparent*, so you look straight through every
+frame to the ones behind it — the same way you would through a screen
+showing a screen. Only transforms and opacity are written, so the whole
+effect stays on the compositor: no layout is read or written per frame.
+
+Two things use it:
+
+| Where | Driver | Behaviour |
+| --- | --- | --- |
+| **Hero** (`DrosteHero.astro`) | page scroll | One screen of scrolling advances 2.1 levels. Also drifts on its own at 0.03 levels/sec, so it is alive before you touch anything, plus pointer parallax on the stage. |
+| **Our Process** (`ProcessTunnel.astro`) | sticky pin, 3 screens | Scrolling flies you through frames labelled Build → Test → Refine → Repeat → **Build**. The loop closing on itself is the visual, not an illustration of it. |
+
+Only one frame carries legible content at a time — `contentFade()` is
+deliberately narrow. Two frames showing the same block at two sizes in
+nearly the same place reads as a smear, not as depth. The step list takes
+its active item from `focusIndex()`, the same function that decides
+legibility, so the words can never drift out of step with the frames.
+
+### Everywhere else
 
 | Where | What |
 | --- | --- |
 | Logo | A disc containing a square, containing a smaller square, containing a point. Slowly counter-rotating. |
-| Hero | `DrosteFrame.astro` renders **itself** five levels deep, with pointer and scroll parallax. |
 | Page load | A 900ms zoom through nested frames. Once per session only. |
-| Process section | Four nested rings, one per step of build → test → refine → repeat. |
 | Cards | Two inset hairlines resolve inward on hover — a card inside a card. |
 | Buttons | An inset ring closes in on hover. |
 | Focus ring | The halo echoes itself once. |
@@ -121,17 +156,28 @@ any size, weighs almost nothing, and animates.
 | Footer, 404, team | Nested-ring watermarks. |
 | Form spinner | Concentric rings, each turning slower than the one outside it. |
 
-**Constraints held throughout:**
+### Constraints held throughout
 
-- Depth is capped at **5 levels on desktop, 3 on mobile** (`src/styles/base.css`).
-- Below depth 2 the frame copy is swapped for abstract bars — microtype is
-  noise, and dropping it keeps the composite cheap.
+- Depth caps at **7 levels on desktop, 5 on mobile**; the extra frames are
+  removed from the DOM on small screens, not just hidden.
+- The animation loop is **torn down when the tunnel leaves the viewport**
+  and on tab hide — a visitor reading the blog does not pay for a hero they
+  cannot see.
 - `prefers-reduced-motion` keeps every nested geometry and removes only the
-  movement. Nothing disappears; the intro animation is skipped entirely.
-- Recursion depth and rotation are single tokens (`--droste-*`), so the whole
-  motif is tuned from one place.
+  movement: the tunnel renders once, static; the intro is skipped entirely;
+  and **the pin collapses**, so nobody scrolls three screens past a still
+  picture.
+- Below 980px the process section does not pin at all — it becomes an
+  ordinary list with the tunnel beside it.
 
----
+### Verifying it still moves
+
+`node zoomtest.mjs` prints the real computed scale of every frame at
+several scroll positions and asserts they change; `node synctest.mjs`
+sweeps 41 positions across the pin and checks the step label matches the
+focused frame at every one, with never more than one legible frame at a
+time; `node motiontest.mjs` covers the reduced-motion, mobile and
+off-screen paths.
 
 ## Project structure
 
@@ -143,10 +189,12 @@ src/
 │  ├─ blog.ts       Posts, authors, categories + the async API
 │  ├─ work.ts       Case studies and our own products
 │  └─ process.ts    Build/test/refine/repeat loop, team
-├─ lib/url.ts       Base-aware url() — every internal link goes through it
+├─ lib/
+│  ├─ url.ts       Base-aware url() — every internal link goes through it
+│  └─ droste.ts    The infinite-zoom engine
 ├─ layouts/         BaseLayout: head, SEO, palette restore, reveal observer
 ├─ components/
-│  ├─ droste/       DrosteFrame, DrosteHero, ProcessLoop, DrosteIntro
+│  ├─ droste/       DrosteZoom (the engine), DrosteHero, ProcessTunnel, DrosteIntro
 │  ├─ ui/           Buttons, cards, section headings, CTA band, page hero
 │  ├─ blog/         PostCard
 │  └─ …             Header, Footer, Logo, Icons, forms, PaletteSwitcher
@@ -222,6 +270,9 @@ Two scripts in the repo root check the things that are easy to break:
 ```bash
 node audit.mjs      # interaction + structure/SEO across all 10 page types
 node contrast.mjs   # WCAG AA across all 8 palette/theme combinations
+node zoomtest.mjs   # the Droste zoom is genuinely scroll-driven
+node synctest.mjs   # step labels track the frames across the whole pin
+node motiontest.mjs # reduced-motion, mobile and off-screen behaviour
 ```
 
 `audit.mjs` covers the palette switcher, mobile nav, contact validation and

@@ -4,7 +4,7 @@ import Hero from '../components/home/Hero.astro';
 import Stats from '../components/home/Stats.astro';
 import SectionHeading from '../components/ui/SectionHeading.astro';
 import ServiceCard from '../components/ui/ServiceCard.astro';
-import ProcessLoop from '../components/droste/ProcessLoop.astro';
+import ProcessTunnel from '../components/droste/ProcessTunnel.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import CtaBand from '../components/ui/CtaBand.astro';
 import Icons from '../components/Icons.astro';
@@ -70,7 +70,8 @@ const sectors = ['Retail & E-commerce', 'Professional Services', 'Logistics', 'R
     </div>
   </section>
 
-  <!-- Process — the Droste concept as an actual method -->
+  <!-- Process — the Droste concept as the actual method. Scrolling this
+       section flies you through Build → Test → Refine → Repeat → Build. -->
   <section class="section" id="process">
     <div class="shell">
       <SectionHeading
@@ -78,10 +79,8 @@ const sectors = ['Retail & E-commerce', 'Professional Services', 'Logistics', 'R
         title="We check our work. Then we check the checking."
         lede="The name is a process commitment, not a slogan. Every release passes through the same loop, and the loop runs until there is nothing left to catch."
       />
-      <div class="process-wrap" data-reveal>
-        <ProcessLoop />
-      </div>
     </div>
+    <ProcessTunnel />
   </section>
 
   <!-- Proof / sector wall -->

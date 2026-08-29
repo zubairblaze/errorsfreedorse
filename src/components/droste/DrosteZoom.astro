@@ -1,0 +1,325 @@
+---
+/**
+ * An infinite Droste zoom: concentric frames of the site inside the site,
+ * falling toward the viewer as the page scrolls, forever.
+ *
+ * Each frame's screen is TRANSPARENT — only its chrome and its top-left
+ * brand block are painted. That is what makes the tunnel readable: you look
+ * straight through every frame to the ones behind it, exactly as you would
+ * through a screen showing a screen.
+ *
+ * Two drivers:
+ *   viewport — progress from the page scrolling past this element (hero)
+ *   pin      — progress handed down by a sticky [data-droste-pin] ancestor
+ *
+ * Depth caps at 7 on desktop and 5 on mobile. With reduced motion the
+ * tunnel is rendered once, static, at a fixed depth: the geometry survives,
+ * only the falling stops.
+ */
+import Logo from '../Logo.astro';
+import { processSteps } from '../../data/process.ts';
+
+interface Props {
+  levels?: number;
+  /** Fraction each level is of the one outside it. */
+  ratio?: number;
+  /** Degrees of twist per level. */
+  rotate?: number;
+  driver?: 'viewport' | 'pin';
+  /** Levels advanced per viewport scrolled (viewport driver only). */
+  span?: number;
+  /** 'browser' shows site chrome; 'steps' labels each frame with a process step. */
+  variant?: 'browser' | 'steps';
+  /** Slow autonomous drift in levels per second, so it lives before you scroll. */
+  drift?: number;
+  class?: string;
+}
+
+const {
+  levels = 7,
+  ratio = 0.62,
+  rotate = 7,
+  driver = 'viewport',
+  span = 1.9,
+  variant = 'browser',
+  drift = 0.024,
+  class: className = '',
+} = Astro.props;
+
+const indices = Array.from({ length: levels }, (_, i) => i);
+---
+
+<div
+  class:list={['dz', `dz--${variant}`, className]}
+  data-droste-zoom
+  data-levels={levels}
+  data-ratio={ratio}
+  data-rotate={rotate}
+  data-driver={driver}
+  data-variant={variant}
+  data-span={span}
+  data-drift={drift}
+  role="img"
+  aria-label={variant === 'steps'
+    ? 'A frame labelled Build contains a frame labelled Test, which contains Refine, which contains Repeat, which contains Build again — the loop nested inside itself without end.'
+    : 'A browser window showing the ErrorsFree site, which shows itself again inside its own screen, repeating without end.'}
+>
+  <div class="dz__stage">
+    {indices.map((i) => (
+      <div class="dz__level" data-level={i} style={`--s:${Math.pow(ratio, i)};--r:${i * rotate}deg;--o:1;--z:${levels - i}`}>
+        {variant === 'browser' ? (
+          <div class="dz__frame">
+            <div class="dz__chrome">
+              <span class="dz__dot"></span><span class="dz__dot"></span><span class="dz__dot"></span>
+              <span class="dz__url">errorsfree.com</span>
+            </div>
+            <div class="dz__screen">
+              <div class="dz__brand">
+                <Logo variant="mark" size={22} />
+                <p class="dz__head">Build it right.<br />Then check it again.</p>
+                <span class="dz__chips">
+                  <span class="dz__chip">Build</span>
+                  <span class="dz__chip">Test</span>
+                  <span class="dz__chip dz__chip--on">Verified</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="dz__frame dz__frame--step">
+            <span class="dz__step-tag mono">{processSteps[i % processSteps.length].n}</span>
+            <span class="dz__step-name">{processSteps[i % processSteps.length].title}</span>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .dz { position: relative; width: 100%; height: 100%; }
+
+  .dz__stage {
+    position: absolute; inset: 0;
+    /* The pointer parallax lives here so it never enters the per-frame
+       transform, which stays purely scale + rotate. */
+    transform: translate3d(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -10px), 0);
+    transition: transform 500ms var(--ease-out);
+  }
+
+  .dz__level {
+    position: absolute;
+    /* Every frame is laid out at the same size and then scaled, so all of
+       them stay pixel-perfect vector at any depth. */
+    inset: 7% 2%;
+    transform: scale(var(--s)) rotate(var(--r));
+    opacity: var(--o);
+    z-index: var(--z);
+    transform-origin: center center;
+    will-change: transform, opacity;
+  }
+
+  .dz__frame {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    /* A little accent in the hairline keeps the deeper frames from
+       dissolving into the background, which they do at pure --line-2 on a
+       dark ground. */
+    border: 1.5px solid color-mix(in srgb, var(--line-2) 68%, var(--accent) 32%);
+    border-radius: 18px;
+    /* A faint translucent pane rather than no fill at all. Each one veils
+       the frames behind it a little, so depth accumulates the way it does
+       through stacked glass — and the tunnel stops reading as wireframe. */
+    background: color-mix(in srgb, var(--bg-2) 30%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--bg) 55%, transparent),
+      0 30px 60px -42px rgb(var(--shadow) / 0.55);
+    overflow: hidden;
+  }
+
+  /* --- Browser variant ------------------------------------------- */
+  .dz__chrome {
+    display: flex; align-items: center; gap: 6px;
+    padding: 11px 15px;
+    border-bottom: 1.5px solid var(--line-2);
+    background: color-mix(in srgb, var(--bg-3) 78%, transparent);
+    backdrop-filter: blur(2px);
+    flex: none;
+  }
+  .dz__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); flex: none; }
+  .dz__dot:first-child { background: var(--accent); }
+  .dz__url { margin-inline-start: auto; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  .dz__screen { position: relative; flex: 1; }
+  .dz__brand {
+    position: absolute; top: 26px; left: 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    /* Set per frame by the zoom engine: only the frames at readable size
+       carry their contents, so the blocks never stack into a smear. */
+    opacity: var(--co, 1);
+    /* Sits in the corner so the middle of every frame stays clear and the
+       tunnel reads all the way down. */
+  }
+  .dz__head {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 21px; line-height: 1.15; letter-spacing: -0.03em;
+    color: var(--ink); margin: 0;
+  }
+  .dz__chips { display: flex; gap: 6px; }
+  .dz__chip {
+    font-family: var(--font-mono); font-size: 9.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px;
+    color: var(--ink-3); white-space: nowrap;
+  }
+  .dz__chip--on { border-color: var(--accent); color: var(--accent); }
+
+  /* --- Steps variant --------------------------------------------- */
+  .dz__frame--step > * { opacity: var(--co, 1); }
+  .dz__frame--step {
+    align-items: center; justify-content: flex-start;
+    flex-direction: row; gap: 14px;
+    padding: 16px 24px;
+    border-width: 2px;
+    border-radius: 22px;
+    display: flex;
+  }
+  .dz__frame--step { align-items: flex-start; }
+  .dz__step-tag { font-size: 13px; color: var(--accent); letter-spacing: 0.1em; flex: none; }
+  .dz__step-name {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 22px; letter-spacing: -0.025em; color: var(--ink);
+    line-height: 1;
+  }
+
+  /* The frame the viewer is currently passing through is picked out by the
+     driver script, so the tunnel always has a focal point. */
+  .dz__level[data-focus] .dz__frame {
+    border-color: var(--accent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--bg) 55%, transparent),
+      0 0 0 1px rgb(var(--glow) / 0.18),
+      0 34px 70px -40px rgb(var(--shadow) / 0.6);
+  }
+  .dz__level[data-focus] .dz__frame--step {
+    box-shadow: 0 0 0 1px rgb(var(--glow) / 0.4), 0 0 60px -12px rgb(var(--glow) / 0.55);
+  }
+  .dz__level[data-focus] .dz__step-name { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    .dz__level { inset: 6% 1%; }
+    .dz__brand { top: 18px; left: 18px; gap: 8px; }
+    .dz__head { font-size: 17px; }
+    .dz__chrome { padding: 9px 12px; }
+    .dz__frame { border-radius: 14px; }
+  }
+
+  /* Without JS, or with reduced motion, the nested geometry is already in
+     the inline styles — the tunnel is simply still. */
+  @media (prefers-reduced-motion: reduce) {
+    .dz__stage { transform: none; transition: none; }
+    .dz__level { will-change: auto; }
+  }
+</style>
+
+<script>
+  import { applyZoom, focusIndex, prefersReducedMotion, type ZoomConfig } from '../../lib/droste.ts';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-droste-zoom]')) {
+    const cfg: ZoomConfig = {
+      levels: Number(root.dataset.levels ?? 7),
+      ratio: Number(root.dataset.ratio ?? 0.62),
+      rotate: Number(root.dataset.rotate ?? 7),
+    };
+    const nodes = [...root.querySelectorAll<HTMLElement>('.dz__level')];
+    const reduce = prefersReducedMotion();
+
+    // Fewer levels on small screens: the outer two are mostly off-frame
+    // there anyway, and each one costs a composited layer.
+    if (window.matchMedia('(max-width: 720px)').matches && cfg.levels > 5) {
+      for (const n of nodes.slice(5)) n.remove();
+      nodes.length = 5;
+      cfg.levels = 5;
+    }
+
+    const render = (p: number) => {
+      applyZoom(nodes, p, cfg);
+      // The focused frame is the legible one, by the same measure that
+      // decides legibility. Any other rule lets the accent border and the
+      // step list point at a frame whose label has already dissolved.
+      const best = focusIndex(p, cfg.levels);
+      nodes.forEach((n, i) => n.toggleAttribute('data-focus', i === best));
+      if (root.dataset.focusIndex !== String(best)) {
+        root.dataset.focusIndex = String(best);
+        root.dispatchEvent(new CustomEvent('droste:focus', { detail: { index: best }, bubbles: true }));
+      }
+    };
+
+    if (reduce) {
+      render(0);
+      continue;
+    }
+
+    let scrollP = 0;
+    let driftP = 0;
+    const drift = Number(root.dataset.drift ?? 0);
+    const span = Number(root.dataset.span ?? 1.9);
+    const driver = root.dataset.driver ?? 'viewport';
+
+    const readScroll = () => {
+      if (driver === 'pin') {
+        const pin = root.closest<HTMLElement>('[data-droste-pin]');
+        if (!pin) return scrollP;
+        const r = pin.getBoundingClientRect();
+        const travel = Math.max(1, pin.offsetHeight - window.innerHeight);
+        // 0 when the pin's top hits the viewport top, 1 when it lets go.
+        const t = Math.min(1, Math.max(0, -r.top / travel));
+        return t * Number(root.dataset.span ?? 4);
+      }
+      // Viewport driver: one screen of scrolling advances `span` levels.
+      return (window.scrollY / Math.max(1, window.innerHeight)) * span;
+    };
+
+    // The loop is torn down entirely when the tunnel leaves the viewport
+    // rather than left spinning on a no-op branch, so a visitor reading the
+    // blog is not paying for a hero they cannot see.
+    let last = performance.now();
+    let raf = 0;
+    const frame = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      driftP += drift * dt;
+      scrollP = readScroll();
+      render(scrollP + driftP);
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+
+    new IntersectionObserver(
+      (entries) => { for (const e of entries) (e.isIntersecting ? start() : stop()); },
+      { rootMargin: '150px' },
+    ).observe(root);
+
+    // A backgrounded tab gets throttled rAF anyway; stopping outright is
+    // cheaper still and makes the intent explicit.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (root.getBoundingClientRect().bottom > -150) start();
+    });
+
+    // Pointer parallax on the stage as a whole, not per frame.
+    if (!window.matchMedia('(pointer: coarse)').matches) {
+      const stage = root.querySelector<HTMLElement>('.dz__stage');
+      root.addEventListener('pointermove', (e) => {
+        const r = root.getBoundingClientRect();
+        stage?.style.setProperty('--px', (((e.clientX - r.left) / r.width - 0.5) * 2).toFixed(3));
+        stage?.style.setProperty('--py', (((e.clientY - r.top) / r.height - 0.5) * 2).toFixed(3));
+      });
+      root.addEventListener('pointerleave', () => {
+        stage?.style.setProperty('--px', '0');
+        stage?.style.setProperty('--py', '0');
+      });
+    }
+  }
+</script>
