@@ -1,0 +1,154 @@
+---
+import Logo from './Logo.astro';
+import Icons from './Icons.astro';
+import { site } from '../data/site.ts';
+import { url } from '../lib/url.ts';
+
+interface Props { path?: string; }
+const { path = '/' } = Astro.props;
+const isActive = (href: string) => path === href || (href !== '/' && path.startsWith(href));
+---
+
+<header class="hdr" data-header>
+  <div class="hdr__inner shell-wide">
+    <a class="hdr__brand" href={url('/')} aria-label={`${site.name} — home`}>
+      <Logo animate />
+    </a>
+
+    <nav class="hdr__nav" aria-label="Primary">
+      <ul class="hdr__list">
+        {site.nav.map((item) => (
+          <li>
+            <a class="hdr__link" href={url(item.href)}
+               aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="hdr__actions">
+      <a class="btn btn--primary hdr__cta" href={url('/contact/')}>
+        Book a consultation
+        <Icons name="arrow" size={16} class="arrow" />
+      </a>
+      <button type="button" class="hdr__burger" data-nav-toggle
+              aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu">
+        <Icons name="menu" size={22} />
+      </button>
+    </div>
+  </div>
+
+  <div class="hdr__mobile" id="mobile-nav" data-mobile-nav hidden>
+    <ul class="hdr__mobile-list">
+      {site.nav.map((item) => (
+        <li>
+          <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+            <Icons name="arrow" size={17} />
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a class="btn btn--primary btn--lg hdr__mobile-cta" href={url('/contact/')}>Book a consultation</a>
+    <p class="hdr__mobile-meta mono">{site.contact.email}<br />{site.contact.phone}</p>
+  </div>
+</header>
+
+<style>
+  .hdr {
+    position: sticky; top: 0; z-index: 80;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
+  }
+  .hdr[data-scrolled] { border-bottom-color: var(--line); background: color-mix(in srgb, var(--bg) 92%, transparent); }
+
+  .hdr__inner {
+    display: flex; align-items: center; gap: var(--s-5);
+    min-height: 4.5rem;
+  }
+  .hdr__brand { flex: none; }
+
+  .hdr__nav { margin-inline-start: auto; }
+  .hdr__list { display: flex; gap: var(--s-2); list-style: none; margin: 0; padding: 0; }
+
+  /* The active link is marked by a nested pair of underlines — the
+     recursion motif at its smallest useful size. */
+  .hdr__link {
+    position: relative;
+    display: block;
+    padding: 0.5em 0.85em;
+    font-size: var(--t-sm); font-weight: 500;
+    color: var(--ink-2);
+    border-radius: var(--r-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .hdr__link:hover { color: var(--ink); }
+  .hdr__link::after {
+    content: ""; position: absolute; left: 0.85em; right: 0.85em; bottom: 0.2em;
+    height: 1px; background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .hdr__link:hover::after { transform: scaleX(1); }
+  .hdr__link[aria-current="page"] { color: var(--accent); }
+  .hdr__link[aria-current="page"]::after { transform: scaleX(1); }
+
+  .hdr__actions { display: flex; align-items: center; gap: var(--s-3); flex: none; }
+  .hdr__burger { display: none; color: var(--ink); padding: 0.4em; border-radius: var(--r-2); }
+
+  /* --- Mobile ----------------------------------------------------- */
+  .hdr__mobile {
+    border-top: 1px solid var(--line);
+    padding: var(--s-4) var(--gutter) var(--s-6);
+    display: grid; gap: var(--s-4);
+    background: var(--bg);
+    max-height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
+  }
+  .hdr__mobile-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .hdr__mobile-list a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.95em 0.2em;
+    font-family: var(--font-display); font-size: var(--t-xl); font-weight: 600;
+    letter-spacing: -0.025em;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .hdr__mobile-list a[aria-current="page"] { color: var(--accent); }
+  .hdr__mobile-cta { width: 100%; }
+  .hdr__mobile-meta { font-size: var(--t-xs); color: var(--ink-3); line-height: 1.9; letter-spacing: 0.04em; }
+
+  @media (max-width: 900px) {
+    .hdr__nav, .hdr__cta { display: none; }
+    .hdr__burger { display: block; margin-inline-start: auto; }
+    .hdr__inner { min-height: 4rem; }
+  }
+  @media (min-width: 901px) {
+    .hdr__mobile { display: none !important; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const onScroll = () => header?.toggleAttribute('data-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const toggle = document.querySelector<HTMLElement>('[data-nav-toggle]');
+  const nav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  toggle?.addEventListener('click', () => {
+    const open = nav?.hidden ?? true;
+    if (nav) nav.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  // Close the sheet if the viewport grows past the breakpoint.
+  window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
+    if (e.matches && nav) { nav.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); }
+  });
+</script>

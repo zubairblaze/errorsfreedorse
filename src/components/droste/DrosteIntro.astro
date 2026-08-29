@@ -1,0 +1,69 @@
+---
+/**
+ * First-load intro: a zoom through nested frames, resolving on the mark.
+ *
+ * Deliberately restrained — 900ms, once per browser session, never for
+ * visitors who ask for reduced motion, and never at all without JS. The
+ * markup ships hidden and the inline script directly below it decides
+ * before the rest of the page paints, so there is no flash of content
+ * followed by a curtain.
+ */
+---
+<div class="intro" data-droste-intro hidden aria-hidden="true">
+  <div class="intro__well">
+    <div class="intro__frame" style="--i:0"></div>
+    <div class="intro__frame" style="--i:1"></div>
+    <div class="intro__frame" style="--i:2"></div>
+    <div class="intro__frame" style="--i:3"></div>
+    <div class="intro__frame" style="--i:4"></div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var el = document.querySelector('[data-droste-intro]');
+    if (!el) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var seen = false;
+    try { seen = sessionStorage.getItem('ef.intro') === '1'; } catch (e) {}
+    if (reduce || seen) { el.remove(); return; }
+    try { sessionStorage.setItem('ef.intro', '1'); } catch (e) {}
+    el.hidden = false;
+    // Belt and braces: the CSS animation removes it visually, this removes
+    // it from the DOM. Either alone is sufficient.
+    setTimeout(function () { el.remove(); }, 1400);
+  })();
+</script>
+
+<style>
+  .intro {
+    position: fixed; inset: 0; z-index: 200;
+    display: grid; place-items: center;
+    background: var(--bg);
+    animation: intro-out 320ms var(--ease-out) 780ms forwards;
+  }
+  @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
+
+  .intro__well { position: relative; width: min(42vmin, 20rem); aspect-ratio: 1; }
+
+  /* Each frame starts smaller than the last and scales through the
+     viewer — the sensation of falling into the recursion rather than
+     watching it. */
+  .intro__frame {
+    position: absolute; inset: 0;
+    border: 1.5px solid var(--line-2);
+    border-radius: 14%;
+    opacity: 0;
+    transform: scale(calc(0.16 + var(--i) * 0.03)) rotate(calc(var(--i) * 8deg));
+    animation: intro-zoom 900ms var(--ease-out) calc(var(--i) * 92ms) forwards;
+  }
+  .intro__frame:nth-child(3) { border-color: var(--accent); }
+
+  @keyframes intro-zoom {
+    0%   { opacity: 0; transform: scale(0.14) rotate(24deg); }
+    45%  { opacity: 1; }
+    100% { opacity: 0; transform: scale(2.4) rotate(0deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+</style>

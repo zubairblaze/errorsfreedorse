@@ -1,0 +1,70 @@
+---
+/**
+ * ErrorsFree mark and lockup.
+ *
+ * The emblem is the brand argument in miniature: a disc containing a
+ * square, containing a smaller square, containing a point. Three levels —
+ * enough to read as recursion at hero size, still legible at 16px.
+ * Colours resolve from tokens, so the mark restyles with the palette.
+ */
+interface Props {
+  variant?: 'full' | 'mark';
+  size?: number;
+  /** Adds the slow signature rotation to the inner frames. */
+  animate?: boolean;
+  class?: string;
+}
+const { variant = 'full', size = 34, animate = false, class: className = '' } = Astro.props;
+---
+
+<span class:list={['logo', className]} data-variant={variant}>
+  <svg
+    class:list={['logo__mark', animate && 'logo__mark--spin']}
+    width={size} height={size} viewBox="0 0 40 40"
+    role="img" aria-label="ErrorsFree" focusable="false"
+  >
+    <circle cx="20" cy="20" r="19" fill="var(--accent)" />
+    <g fill="none" stroke="var(--on-accent)" stroke-linejoin="round">
+      <rect class="lvl lvl-1" x="9.5" y="9.5" width="21" height="21" rx="5" stroke-width="2.1" />
+      <rect class="lvl lvl-2" x="13.6" y="13.6" width="12.8" height="12.8" rx="3.1" stroke-width="1.7" />
+    </g>
+    <circle class="lvl lvl-3" cx="20" cy="20" r="2.1" fill="var(--on-accent)" />
+  </svg>
+
+  {variant === 'full' && (
+    <span class="logo__word">Errors<span class="logo__word-accent">Free</span></span>
+  )}
+</span>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.62em; }
+  .logo__mark { flex: none; overflow: visible; }
+
+  /* Each level twists a little further than its parent — the recursion
+     is in the transform chain, not in exported artwork. */
+  .lvl { transform-origin: 20px 20px; transform-box: view-box; }
+  .lvl-1 { transform: rotate(calc(var(--droste-rotate, 5deg) * 3)); }
+  .lvl-2 { transform: rotate(calc(var(--droste-rotate, 5deg) * 6)); }
+
+  .logo__mark--spin .lvl-1 { animation: droste-cw var(--droste-spin, 26s) linear infinite; }
+  .logo__mark--spin .lvl-2 { animation: droste-ccw calc(var(--droste-spin, 26s) * 0.66) linear infinite; }
+
+  @keyframes droste-cw  { to { transform: rotate(375deg); } }
+  @keyframes droste-ccw { to { transform: rotate(-330deg); } }
+
+  .logo__word {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.16rem;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .logo__word-accent { color: var(--accent); }
+
+  /* Reduced motion keeps the nested geometry, drops the rotation only. */
+  @media (prefers-reduced-motion: reduce) {
+    .logo__mark--spin .lvl-1,
+    .logo__mark--spin .lvl-2 { animation: none; }
+  }
+</style>

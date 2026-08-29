@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import ServiceCard from '../../components/ui/ServiceCard.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icons from '../../components/Icons.astro';
+import { services } from '../../data/services.ts';
+import { url } from '../../lib/url.ts';
+---
+<BaseLayout
+  title="Services"
+  path="/services/"
+  description="Custom app development, AI integration, SaaS products and digital consultancy for small and medium businesses across the GCC."
+>
+  <PageHero
+    eyebrow="Services"
+    title="Four ways we take work off your desk."
+    lede="Each engagement starts the same way: we work out what the problem is actually costing you. If the numbers do not justify the build, we say so before you spend anything."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <div class="grid grid-sm-2 grid-lg-4">
+        {services.map((s, i) => <ServiceCard service={s} index={i} level={2} />)}
+      </div>
+    </div>
+  </section>
+
+  {services.map((s, i) => (
+    <section class="section svc-row" id={s.slug}>
+      <div class="shell">
+        <div class="svc-row__grid">
+          <div data-reveal>
+            <p class="eyebrow">{String(s.order).padStart(2, '0')} · {s.short}</p>
+            <h2 class="svc-row__title">{s.title}</h2>
+            <p class="lede svc-row__intro">{s.intro}</p>
+            <a class="btn btn--primary" href={url(`/services/${s.slug}/`)}>
+              Full detail <Icons name="arrow" size={16} class="arrow" />
+            </a>
+          </div>
+          <ul class="svc-row__list" data-reveal style="--reveal-delay:90ms">
+            {s.deliverables.map((d) => (
+              <li><Icons name="check" size={16} />{d}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .svc-row { border-top: 1px solid var(--line); }
+  .svc-row__grid { display: grid; gap: var(--s-6); }
+  @media (min-width: 900px) { .svc-row__grid { grid-template-columns: 1.1fr 1fr; gap: var(--s-8); align-items: start; } }
+  .svc-row__title { margin-top: var(--s-3); }
+  .svc-row__intro { margin-block: var(--s-4) var(--s-5); }
+  .svc-row__list { list-style: none; padding: var(--s-5); margin: 0; display: grid; gap: var(--s-3);
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-4); }
+  .svc-row__list li { display: flex; gap: 0.7em; align-items: start; font-size: var(--t-sm); color: var(--ink-2); }
+  .svc-row__list :global(svg) { color: var(--accent); flex: none; margin-top: 0.2em; }
+</style>

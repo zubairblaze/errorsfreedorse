@@ -1,0 +1,125 @@
+---
+/**
+ * The signature hero visual: a device frame showing itself, five levels
+ * deep, drifting on pointer position and scroll.
+ *
+ * Motion is applied by writing two CSS custom properties (--px, --py) on
+ * this element. No layout is read or written per frame, so the whole
+ * effect stays on the compositor. If the script never runs the visual is
+ * still complete — just still.
+ */
+import DrosteFrame from './DrosteFrame.astro';
+
+interface Props { depth?: number; class?: string; }
+const { depth = 4, class: className = '' } = Astro.props;
+---
+
+<div class:list={['droste-hero', className]} data-droste-hero>
+  <div class="droste-hero__halo" aria-hidden="true"></div>
+
+  <!-- The nesting is decorative; the page's meaning lives in the copy
+       beside it, so it is hidden from assistive technology and described
+       once, plainly, for anyone who asks. -->
+  <div class="droste-hero__stage" role="img"
+       aria-label="A browser window displaying the ErrorsFree site, which displays itself again inside its own screen, repeating five levels deep.">
+    <DrosteFrame depth={depth} />
+  </div>
+
+  <p class="droste-hero__caption mono" aria-hidden="true">
+    <span class="droste-hero__pulse"></span>depth 05 · verified at every level
+  </p>
+</div>
+
+<style>
+  .droste-hero { position: relative; width: 100%; }
+
+  .droste-hero__halo {
+    position: absolute; inset: -18% -12% -8%;
+    background: radial-gradient(ellipse 60% 55% at 55% 45%, rgb(var(--glow) / 0.18), transparent 68%);
+    pointer-events: none;
+    filter: blur(6px);
+  }
+
+  .droste-hero__stage {
+    position: relative;
+    aspect-ratio: 4 / 3.15;
+    perspective: 1400px;
+    transform:
+      rotateY(calc(var(--px, 0) * -3.2deg))
+      rotateX(calc(var(--py, 0) * 2.4deg))
+      translateY(calc(var(--sy, 0) * -14px));
+    transform-style: preserve-3d;
+    transition: transform 420ms var(--ease-out);
+    will-change: transform;
+  }
+  .droste-hero__stage > :global(.frame) { position: absolute; inset: 0; }
+
+  .droste-hero__caption {
+    margin-top: var(--s-4);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex; align-items: center; gap: 0.6em;
+  }
+  .droste-hero__pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 0 rgb(var(--glow) / 0.6);
+    animation: pulse 2.6s var(--ease-out) infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgb(var(--glow) / 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgb(var(--glow) / 0); }
+    100% { box-shadow: 0 0 0 0 rgb(var(--glow) / 0); }
+  }
+
+  @media (max-width: 900px) {
+    .droste-hero__stage { aspect-ratio: 4 / 3.3; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .droste-hero__stage { transform: none; transition: none; }
+    .droste-hero__pulse { animation: none; }
+  }
+</style>
+
+<script>
+  // Pointer + scroll parallax, written as CSS variables only.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const coarse = window.matchMedia('(pointer: coarse)');
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-droste-hero]')) {
+    if (reduce.matches) continue;
+
+    let frame = 0;
+    const write = (px: number, py: number) => {
+      el.style.setProperty('--px', px.toFixed(3));
+      el.style.setProperty('--py', py.toFixed(3));
+    };
+
+    if (!coarse.matches) {
+      el.addEventListener('pointermove', (e) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const r = el.getBoundingClientRect();
+          write(((e.clientX - r.left) / r.width - 0.5) * 2, ((e.clientY - r.top) / r.height - 0.5) * 2);
+        });
+      });
+      el.addEventListener('pointerleave', () => write(0, 0));
+    }
+
+    // Scroll drift: -1 .. 1 as the element crosses the viewport.
+    let sFrame = 0;
+    const onScroll = () => {
+      if (sFrame) return;
+      sFrame = requestAnimationFrame(() => {
+        sFrame = 0;
+        const r = el.getBoundingClientRect();
+        const progress = (r.top + r.height / 2) / (window.innerHeight + r.height);
+        el.style.setProperty('--sy', (progress * 2 - 1).toFixed(3));
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>

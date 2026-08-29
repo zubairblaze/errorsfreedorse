@@ -1,0 +1,29 @@
+---
+import { site } from '../../data/site.ts';
+---
+<section class="stats" aria-label="Key facts">
+  <div class="shell-wide">
+    <dl class="stats__grid">
+      {site.stats.map((s, i) => (
+        <div class="stats__item" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+          <dt class="stats__label">{s.label}</dt>
+          <dd class="stats__value">
+            <span class="stats__num">{s.value}</span><span class="stats__unit">{s.unit}</span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+<style>
+  .stats { padding-block: var(--s-6); border-block: 1px solid var(--line); background: var(--bg-2); }
+  .stats__grid { display: grid; gap: var(--s-5); margin: 0; }
+  @media (min-width: 640px) { .stats__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .stats__grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .stats__item { display: flex; flex-direction: column-reverse; gap: 0.3em; padding-inline-start: var(--s-4); border-inline-start: 2px solid var(--accent); }
+  .stats__label { font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.02em; }
+  .stats__value { margin: 0; display: flex; align-items: baseline; gap: 0.12em; }
+  .stats__num { font-family: var(--font-display); font-size: var(--t-2xl); font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }
+  .stats__unit { font-family: var(--font-mono); font-size: var(--t-sm); color: var(--accent); }
+</style>

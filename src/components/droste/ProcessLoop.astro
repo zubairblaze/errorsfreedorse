@@ -1,0 +1,185 @@
+---
+/**
+ * "Our Process" — the Droste concept stated as an actual method.
+ *
+ * Four nested rings, one per step of the build/test/refine/repeat loop.
+ * Focusing or hovering a step lights its ring; with no interaction the
+ * loop advances on its own, closing back to step one — the process
+ * literally checking its work, checking its work.
+ *
+ * Pure CSS geometry. The rings are four divs scaled and rotated by the
+ * shared --droste-* tokens, so the motif stays in step with the rest of
+ * the site.
+ */
+import { processSteps } from '../../data/process.ts';
+---
+
+<div class="loop" data-process-loop data-active="0">
+  <ol class="loop__steps">
+    {processSteps.map((s, i) => (
+      <li class="loop__step">
+        <button type="button" class="loop__btn" data-step={i}
+                aria-describedby={`loop-desc-${i}`}>
+          <span class="loop__n mono">{s.n}</span>
+          <span class="loop__text">
+            <span class="loop__title">{s.title}</span>
+            <span class="loop__body" id={`loop-desc-${i}`}>{s.body}</span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ol>
+
+  <div class="loop__viz" aria-hidden="true">
+    <div class="loop__rings">
+      {processSteps.map((s, i) => (
+        <div class="loop__ring" data-ring={i} style={`--i:${i}`}>
+          <span class="loop__ring-label mono">{s.title}</span>
+        </div>
+      ))}
+      <div class="loop__core"><span class="loop__core-dot"></span></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .loop {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+  @media (min-width: 980px) { .loop { grid-template-columns: 1fr 1fr; } }
+
+  /* --- Steps ------------------------------------------------------ */
+  .loop__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+  .loop__btn {
+    display: flex; gap: var(--s-4); width: 100%; text-align: start;
+    padding: var(--s-4);
+    border-radius: var(--r-3);
+    border: 1px solid transparent;
+    transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+  }
+  .loop__n {
+    font-size: var(--t-xs); color: var(--ink-3); padding-top: 0.35em;
+    letter-spacing: 0.08em; flex: none;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .loop__text { display: block; }
+  .loop__title {
+    display: block;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: var(--t-lg); letter-spacing: -0.02em; color: var(--ink);
+    margin-bottom: 0.25em;
+  }
+  .loop__body { display: block; color: var(--ink-2); font-size: var(--t-sm); line-height: 1.6; }
+
+  .loop[data-active="0"] .loop__btn[data-step="0"],
+  .loop[data-active="1"] .loop__btn[data-step="1"],
+  .loop[data-active="2"] .loop__btn[data-step="2"],
+  .loop[data-active="3"] .loop__btn[data-step="3"] {
+    background: var(--bg-2);
+    border-color: var(--line);
+  }
+  .loop[data-active="0"] .loop__btn[data-step="0"] .loop__n,
+  .loop[data-active="1"] .loop__btn[data-step="1"] .loop__n,
+  .loop[data-active="2"] .loop__btn[data-step="2"] .loop__n,
+  .loop[data-active="3"] .loop__btn[data-step="3"] .loop__n { color: var(--accent); }
+
+  /* --- Rings ------------------------------------------------------ */
+  .loop__viz { display: grid; place-items: center; }
+  .loop__rings {
+    position: relative;
+    width: min(100%, 30rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  .loop__ring {
+    position: absolute;
+    inset: calc(var(--i) * 11.5%);
+    border: 1px solid var(--line-2);
+    border-radius: clamp(14px, 4%, 34px);
+    display: grid; place-items: start center;
+    transform: rotate(calc(var(--i) * var(--droste-rotate) * 2.2));
+    transition: border-color var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out),
+                transform var(--dur-4) var(--ease-out);
+  }
+  .loop__ring-label {
+    /* Counter-rotates its ring so the rings spiral but the words stay
+       level and readable. */
+    transform: translateY(-50%) rotate(calc(var(--i) * var(--droste-rotate) * -2.2));
+    background: var(--bg);
+    padding-inline: 0.6em;
+    font-size: var(--t-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    transition: color var(--dur-2) var(--ease-out);
+  }
+
+  .loop[data-active="0"] .loop__ring[data-ring="0"],
+  .loop[data-active="1"] .loop__ring[data-ring="1"],
+  .loop[data-active="2"] .loop__ring[data-ring="2"],
+  .loop[data-active="3"] .loop__ring[data-ring="3"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgb(var(--glow) / 0.28), 0 0 40px -10px rgb(var(--glow) / 0.55);
+  }
+  .loop[data-active="0"] .loop__ring[data-ring="0"] .loop__ring-label,
+  .loop[data-active="1"] .loop__ring[data-ring="1"] .loop__ring-label,
+  .loop[data-active="2"] .loop__ring[data-ring="2"] .loop__ring-label,
+  .loop[data-active="3"] .loop__ring[data-ring="3"] .loop__ring-label { color: var(--accent); }
+
+  .loop__core {
+    position: absolute; inset: 46%;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    display: grid; place-items: center;
+    transform: rotate(calc(var(--droste-rotate) * 9));
+  }
+  .loop__core-dot {
+    width: 26%; aspect-ratio: 1; border-radius: 2px; background: var(--accent);
+    animation: core-breathe 3.4s var(--ease-in-out) infinite;
+  }
+  @keyframes core-breathe { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loop__core-dot { animation: none; opacity: 1; }
+  }
+</style>
+
+<script>
+  for (const loop of document.querySelectorAll<HTMLElement>('[data-process-loop]')) {
+    const steps = loop.querySelectorAll<HTMLButtonElement>('.loop__btn');
+    let idle = true;
+    let timer = 0;
+
+    const set = (i: number) => loop.setAttribute('data-active', String(i));
+
+    steps.forEach((btn, i) => {
+      const engage = () => { idle = false; window.clearInterval(timer); set(i); };
+      btn.addEventListener('pointerenter', engage);
+      btn.addEventListener('focus', engage);
+      btn.addEventListener('click', engage);
+    });
+
+    // Auto-advance until the visitor takes over. The loop closes on
+    // itself, which is the whole point of the section.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let i = 0;
+      const start = () => {
+        timer = window.setInterval(() => {
+          if (!idle) return window.clearInterval(timer);
+          i = (i + 1) % steps.length;
+          set(i);
+        }, 2800);
+      };
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && idle) { start(); io.disconnect(); }
+        }
+      }, { threshold: 0.35 });
+      io.observe(loop);
+    }
+  }
+</script>

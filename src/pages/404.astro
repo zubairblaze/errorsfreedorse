@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icons from '../components/Icons.astro';
+import { url } from '../lib/url.ts';
+---
+<BaseLayout title="Page not found" path="/404/" noindex>
+  <section class="nf section">
+    <div class="wash" aria-hidden="true"></div>
+    <div class="shell nf__inner">
+      <div class="nf__mark" aria-hidden="true">
+        <span class="nf__ring" style="--i:0"></span>
+        <span class="nf__ring" style="--i:1"></span>
+        <span class="nf__ring" style="--i:2"></span>
+        <span class="nf__ring" style="--i:3"></span>
+        <span class="nf__code mono">404</span>
+      </div>
+      <h1 class="nf__title">We looked all the way down. It is not here.</h1>
+      <p class="lede nf__body">
+        The page you asked for does not exist, or it moved. Everything else is where you left it.
+      </p>
+      <div class="nf__actions">
+        <a class="btn btn--primary btn--lg" href={url('/')}>Back to home <Icons name="arrow" size={17} class="arrow" /></a>
+        <a class="btn btn--ghost btn--lg" href={url('/contact/')}>Contact us</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .nf { position: relative; overflow: hidden; min-height: 66vh; display: grid; place-items: center; text-align: center; }
+  .nf__inner { position: relative; z-index: 1; max-width: 44rem; }
+  .nf__mark { position: relative; width: 9rem; aspect-ratio: 1; margin: 0 auto var(--s-6); display: grid; place-items: center; }
+  .nf__ring {
+    position: absolute; inset: calc(var(--i) * 12%);
+    border: 1px solid var(--line-2); border-radius: 22%;
+    transform: rotate(calc(var(--i) * var(--droste-rotate) * 2.4));
+  }
+  .nf__ring:last-child { border-color: var(--accent); }
+  .nf__code { position: relative; font-size: var(--t-lg); color: var(--accent); letter-spacing: 0.1em; }
+  .nf__title { font-size: var(--t-3xl); }
+  .nf__body { margin-top: var(--s-4); }
+  .nf__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; margin-top: var(--s-6); }
+</style>

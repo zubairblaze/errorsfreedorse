@@ -1,0 +1,193 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import ProcessLoop from '../components/droste/ProcessLoop.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import Icons from '../components/Icons.astro';
+import { team } from '../data/process.ts';
+import { site } from '../data/site.ts';
+---
+<BaseLayout
+  title="About"
+  path="/about/"
+  description="ErrorsFree is an AI-first development studio and SaaS company serving small and medium businesses across the GCC from Dubai."
+>
+  <PageHero
+    eyebrow="About"
+    title="A studio and a product company, deliberately."
+    lede="We build software for other businesses and we run software of our own. Each side keeps the other honest — and both are held to the standard our name sets."
+  />
+
+  <!-- Story -->
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <div class="story">
+        <div class="story__col" data-reveal>
+          <h2 class="story__h">Why we exist</h2>
+          <p>
+            Small and medium businesses in the Gulf are badly served by the software market.
+            Enterprise vendors price and scope for companies ten times their size. Cheap
+            outsourcing delivers something that works on the demo and falls over in month three.
+            The gap between those two is where most of the region's actual economy sits.
+          </p>
+          <p>
+            ErrorsFree exists in that gap. We take the engineering discipline that enterprise
+            budgets normally buy — real testing, real architecture, real documentation — and
+            apply it at a scope and timeline an SME can actually commit to.
+          </p>
+        </div>
+        <div class="story__col" data-reveal style="--reveal-delay:90ms">
+          <h2 class="story__h">The name</h2>
+          <p>
+            No software is free of errors, and any company claiming otherwise is selling you
+            something. What the name commits us to is a process: build it, test it, refine it,
+            and then run the same loop again over the result.
+          </p>
+          <p>
+            That is also why the recursion motif runs through this site. It is not decoration —
+            it is the method. We check our work, and then we check the checking.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dual model -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="How we are built"
+        title="Two revenue lines, explained plainly."
+        lede="Most studios sell hours. Most SaaS companies sell seats. We do both, on purpose, and it changes what we can offer you."
+      />
+      <div class="grid grid-md-2 dual">
+        <div class="card dual__card" data-reveal>
+          <p class="dual__n mono">01 · Client work</p>
+          <h3>Custom development and consultancy</h3>
+          <p class="muted">
+            Fixed-scope projects and retainers for businesses that need software built around
+            their operation. This is where most of our revenue comes from, and where we meet
+            the problems that later become products.
+          </p>
+          <ul class="dual__list">
+            <li><Icons name="check" size={16} />You own the code outright</li>
+            <li><Icons name="check" size={16} />Fixed timelines, negotiated scope</li>
+            <li><Icons name="check" size={16} />No lock-in, no licence fees to us</li>
+          </ul>
+        </div>
+        <div class="card dual__card" data-reveal style="--reveal-delay:80ms">
+          <p class="dual__n mono">02 · Our products</p>
+          <h3>SaaS tools we build and operate</h3>
+          <p class="muted">
+            Five products in production, each one started as something we needed ourselves.
+            Running them means we carry the cost of our own architectural decisions — which is
+            the fastest way to stop making bad ones.
+          </p>
+          <ul class="dual__list">
+            <li><Icons name="check" size={16} />We operate what we ship</li>
+            <li><Icons name="check" size={16} />Patterns proven before they reach your build</li>
+            <li><Icons name="check" size={16} />Revenue that is not tied to billing you hours</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="section">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="Our process"
+        title="Build. Test. Refine. Repeat."
+        lede="Four steps that close back on themselves. Every release goes round the loop until nothing new comes out of it."
+      />
+      <div style="margin-top:var(--s-7)"><ProcessLoop /></div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="Team"
+        title="Small, senior, and the same people throughout."
+        lede="You meet the engineers who build your software. There is no account layer between you and the work."
+      />
+      <div class="grid grid-sm-2 grid-lg-4 team">
+        {team.map((m, i) => (
+          <article class="card team__card" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <span class="team__mark" aria-hidden="true">
+              <span class="team__ring" style="--i:0"></span>
+              <span class="team__ring" style="--i:1"></span>
+              <span class="team__ring" style="--i:2"></span>
+            </span>
+            <h3 class="team__name">{m.name}</h3>
+            <p class="team__role mono">{m.role}</p>
+            <p class="muted team__bio">{m.bio}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Region -->
+  <section class="section">
+    <div class="shell">
+      <div class="region card" data-reveal>
+        <div>
+          <p class="eyebrow">Where we work</p>
+          <h2 class="region__h">Based in {site.contact.city}. Building for the GCC.</h2>
+          <p class="muted region__body">
+            We are remote-first and work across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain and
+            Oman. That means Gulf working weeks, Gulf timezones, VAT and invoicing that fit local
+            requirements, and interfaces built for Arabic and English from the first component
+            rather than translated at the end.
+          </p>
+        </div>
+        <ul class="region__list">
+          {['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Bahrain', 'Oman'].map((c) => (
+            <li><Icons name="pin" size={15} />{c}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .story { display: grid; gap: var(--s-7); }
+  @media (min-width: 900px) { .story { grid-template-columns: 1fr 1fr; gap: var(--s-8); } }
+  .story__col { display: grid; gap: var(--s-4); color: var(--ink-2); }
+  .story__h { font-size: var(--t-xl); color: var(--ink); }
+
+  .dual { margin-top: var(--s-7); }
+  .dual__card { display: grid; gap: var(--s-3); align-content: start; }
+  .dual__n { font-size: var(--t-xs); letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent); }
+  .dual__list { list-style: none; padding: var(--s-4) 0 0; margin: 0; display: grid; gap: var(--s-2); border-top: 1px solid var(--line); }
+  .dual__list li { display: flex; gap: 0.6em; align-items: center; font-size: var(--t-sm); color: var(--ink-2); }
+  .dual__list :global(svg) { color: var(--accent); flex: none; }
+
+  .team { margin-top: var(--s-7); }
+  .team__card { display: grid; gap: var(--s-2); align-content: start; }
+  .team__mark { position: relative; width: 3rem; height: 3rem; display: block; margin-bottom: var(--s-3); }
+  .team__ring {
+    position: absolute; inset: calc(var(--i) * 16%);
+    border: 1px solid var(--line-2); border-radius: 26%;
+    transform: rotate(calc(var(--i) * var(--droste-rotate) * 2));
+  }
+  .team__ring:last-child { border-color: var(--accent); background: var(--accent-soft); }
+  .team__name { font-size: var(--t-lg); }
+  .team__role { font-size: var(--t-xs); letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+  .team__bio { font-size: var(--t-sm); }
+
+  .region { display: grid; gap: var(--s-6); padding: clamp(1.75rem, 4vw, 3rem); }
+  @media (min-width: 900px) { .region { grid-template-columns: 1.5fr 1fr; gap: var(--s-8); align-items: center; } }
+  .region__h { font-size: var(--t-2xl); margin-top: var(--s-3); }
+  .region__body { margin-top: var(--s-4); max-width: 58ch; }
+  .region__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-3); }
+  .region__list li { display: flex; gap: 0.6em; align-items: center; font-size: var(--t-sm); color: var(--ink-2); }
+  .region__list :global(svg) { color: var(--accent); flex: none; }
+</style>

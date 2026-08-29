@@ -1,0 +1,186 @@
+---
+/**
+ * Runtime palette + theme picker.
+ *
+ * This is a decision tool, not a permanent feature: it exists so the
+ * brand direction can be judged on the real site rather than in a swatch
+ * grid. Once a palette is chosen, set it as the default in BaseLayout,
+ * delete this component and its <BrandLab /> mount — nothing else in the
+ * codebase references it.
+ *
+ * Choice is written to <html data-palette data-theme> and persisted in
+ * localStorage; BaseLayout's inline head script replays it before first
+ * paint so there is no flash.
+ */
+import Icons from './Icons.astro';
+
+const palettes = [
+  { id: 'meridian', name: 'Meridian', note: 'Corporate blue. The Dell register — institutional, trusted, safest for conversion.', dot: '#0a6ed1' },
+  { id: 'obsidian', name: 'Obsidian', note: 'Near-black and electric lime. Reads as a developer tool: sharp and technical.', dot: '#b6f03c' },
+  { id: 'dune',     name: 'Dune',     note: 'Ink and warm gold. Gulf-premium — the palette of a firm that charges properly.', dot: '#e3b857' },
+  { id: 'quantum',  name: 'Quantum',  note: 'Indigo into violet. Signals AI-native and contemporary above all else.', dot: '#9b85ff' },
+];
+---
+
+<div class="lab" data-brand-lab>
+  <button type="button" class="lab__toggle" data-lab-toggle
+          aria-expanded="false" aria-controls="brand-lab-panel">
+    <Icons name="palette" size={18} />
+    <span class="lab__toggle-text">Palette</span>
+  </button>
+
+  <div class="lab__panel" id="brand-lab-panel" data-lab-panel hidden>
+    <div class="lab__head">
+      <div>
+        <p class="lab__title">Brand lab</p>
+        <p class="lab__sub">Four directions, live. Pick one and we lock it in.</p>
+      </div>
+      <button type="button" class="lab__close" data-lab-close aria-label="Close palette picker">
+        <Icons name="close" size={16} />
+      </button>
+    </div>
+
+    <div class="lab__group" role="radiogroup" aria-label="Colour palette">
+      {palettes.map((p) => (
+        <button type="button" class="lab__opt" role="radio" aria-checked="false" data-palette-set={p.id}>
+          <span class="lab__dot" style={`background:${p.dot}`}></span>
+          <span class="lab__opt-text">
+            <span class="lab__opt-name">{p.name}</span>
+            <span class="lab__opt-note">{p.note}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <div class="lab__modes" role="radiogroup" aria-label="Light or dark">
+      <button type="button" class="lab__mode" role="radio" aria-checked="false" data-theme-set="light">
+        <Icons name="sun" size={15} /> Light
+      </button>
+      <button type="button" class="lab__mode" role="radio" aria-checked="false" data-theme-set="dark">
+        <Icons name="moon" size={15} /> Dark
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .lab { position: fixed; right: var(--s-4); bottom: var(--s-4); z-index: 90; }
+
+  .lab__toggle {
+    display: inline-flex; align-items: center; gap: 0.5em;
+    padding: 0.7em 1.1em;
+    border-radius: var(--r-full);
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    color: var(--ink);
+    font-size: var(--t-sm); font-weight: 600;
+    box-shadow: 0 10px 30px -14px rgb(var(--shadow) / 0.5);
+    transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out),
+                color var(--dur-2) var(--ease-out);
+  }
+  .lab__toggle:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  .lab__panel {
+    position: absolute; right: 0; bottom: calc(100% + 0.7rem);
+    width: min(21rem, calc(100vw - 2rem));
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-4);
+    padding: var(--s-4);
+    box-shadow: 0 30px 70px -30px rgb(var(--shadow) / 0.6);
+    display: grid; gap: var(--s-4);
+    animation: lab-in var(--dur-2) var(--ease-out);
+  }
+  @keyframes lab-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+
+  .lab__head { display: flex; align-items: start; justify-content: space-between; gap: var(--s-3); }
+  .lab__title { font-family: var(--font-display); font-weight: 600; font-size: var(--t-base); letter-spacing: -0.02em; }
+  .lab__sub { font-size: var(--t-xs); color: var(--ink-3); margin-top: 0.15em; }
+  .lab__close { color: var(--ink-3); padding: 0.25em; border-radius: var(--r-1); }
+  .lab__close:hover { color: var(--ink); }
+
+  .lab__group { display: grid; gap: 2px; }
+  .lab__opt {
+    display: flex; gap: var(--s-3); align-items: start; text-align: start;
+    padding: 0.7em; border-radius: var(--r-2);
+    border: 1px solid transparent;
+    transition: background-color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+  }
+  .lab__opt:hover { background: var(--bg-2); }
+  .lab__opt[aria-checked="true"] { background: var(--accent-soft); border-color: var(--accent); }
+  .lab__dot {
+    width: 15px; height: 15px; border-radius: 50%; flex: none; margin-top: 0.2em;
+    box-shadow: 0 0 0 1px rgb(var(--shadow) / 0.18), inset 0 0 0 3px rgb(255 255 255 / 0.22);
+  }
+  .lab__opt-name { display: block; font-weight: 600; font-size: var(--t-sm); }
+  .lab__opt-note { display: block; font-size: var(--t-xs); color: var(--ink-3); line-height: 1.45; margin-top: 0.15em; }
+
+  .lab__modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; background: var(--bg-2); border-radius: var(--r-3); }
+  .lab__mode {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.45em;
+    padding: 0.6em; border-radius: calc(var(--r-3) - 3px);
+    font-size: var(--t-sm); font-weight: 500; color: var(--ink-2);
+    transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+  }
+  .lab__mode[aria-checked="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgb(var(--shadow) / 0.16); }
+
+  @media (max-width: 560px) {
+    .lab { right: var(--s-3); bottom: var(--s-3); }
+    .lab__toggle-text { display: none; }
+    .lab__toggle { padding: 0.75em; }
+  }
+  @media print { .lab { display: none; } }
+</style>
+
+<script>
+  const KEY_P = 'ef.palette';
+  const KEY_T = 'ef.theme';
+  const root = document.documentElement;
+
+  const sync = () => {
+    const p = root.dataset.palette;
+    const t = root.dataset.theme;
+    document.querySelectorAll<HTMLElement>('[data-palette-set]')
+      .forEach((b) => b.setAttribute('aria-checked', String(b.dataset.paletteSet === p)));
+    document.querySelectorAll<HTMLElement>('[data-theme-set]')
+      .forEach((b) => b.setAttribute('aria-checked', String(b.dataset.themeSet === t)));
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-palette-set]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      root.dataset.palette = btn.dataset.paletteSet!;
+      try { localStorage.setItem(KEY_P, btn.dataset.paletteSet!); } catch {}
+      sync();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-theme-set]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      root.dataset.theme = btn.dataset.themeSet!;
+      try { localStorage.setItem(KEY_T, btn.dataset.themeSet!); } catch {}
+      sync();
+    });
+  });
+
+  const lab = document.querySelector<HTMLElement>('[data-brand-lab]');
+  const panel = lab?.querySelector<HTMLElement>('[data-lab-panel]');
+  const toggle = lab?.querySelector<HTMLElement>('[data-lab-toggle]');
+
+  const open = (state: boolean) => {
+    if (!panel || !toggle) return;
+    panel.hidden = !state;
+    toggle.setAttribute('aria-expanded', String(state));
+    if (state) panel.querySelector<HTMLElement>('[data-palette-set]')?.focus();
+  };
+
+  toggle?.addEventListener('click', () => open(panel?.hidden ?? true));
+  lab?.querySelector('[data-lab-close]')?.addEventListener('click', () => { open(false); toggle?.focus(); });
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel?.hidden) { open(false); toggle?.focus(); } });
+  document.addEventListener('click', (e) => {
+    if (!panel || panel.hidden) return;
+    if (!lab?.contains(e.target as Node)) open(false);
+  });
+
+  sync();
+</script>

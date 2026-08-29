@@ -1,0 +1,89 @@
+---
+import DrosteHero from '../droste/DrosteHero.astro';
+import Icons from '../Icons.astro';
+import { site } from '../../data/site.ts';
+import { url } from '../../lib/url.ts';
+---
+<section class="hero">
+  <div class="wash" aria-hidden="true"></div>
+  <div class="gridlines" aria-hidden="true"></div>
+
+  <div class="shell-wide hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow" data-reveal>
+        <span class="hero__ping"></span>AI-first development · GCC
+      </p>
+
+      <h1 class="hero__title" data-reveal style="--reveal-delay:70ms">
+        Build it right.<br />
+        <span class="hero__title-accent">Then check it again.</span>
+      </h1>
+
+      <p class="lede hero__lede" data-reveal style="--reveal-delay:140ms">
+        We build AI-first apps and SaaS products for small and medium businesses
+        across the Gulf — scoped in days, shipped in weeks, and verified at every
+        level before they reach your customers.
+      </p>
+
+      <div class="hero__actions" data-reveal style="--reveal-delay:210ms">
+        <a class="btn btn--primary btn--lg" href={url('/contact/')}>
+          Book a consultation <Icons name="arrow" size={17} class="arrow" />
+        </a>
+        <a class="btn btn--ghost btn--lg" href={url('/work/')}>See our work</a>
+      </div>
+
+      <ul class="hero__proof" data-reveal style="--reveal-delay:280ms">
+        <li><Icons name="check" size={15} />Fixed timeline, transparent scope</li>
+        <li><Icons name="check" size={15} />You own the code, always</li>
+        <li><Icons name="check" size={15} />Built for Arabic and English</li>
+      </ul>
+    </div>
+
+    <div class="hero__visual" data-reveal style="--reveal-delay:160ms">
+      <DrosteHero depth={4} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; overflow: hidden; padding-block: clamp(3rem, 2rem + 6vw, 6.5rem) var(--section-y); }
+  .hero__inner {
+    position: relative; z-index: 1;
+    display: grid; gap: clamp(3rem, 6vw, 5rem);
+    align-items: center;
+  }
+  @media (min-width: 1000px) {
+    .hero__inner { grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); gap: clamp(3rem, 5vw, 5.5rem); }
+  }
+
+  .hero__ping {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 3px rgb(var(--glow) / 0.22);
+  }
+
+  .hero__title {
+    margin-top: var(--s-4);
+    /* Capped below --t-5xl so "Then check it again." holds one line at
+       every desktop width; balance handles the rest. */
+    font-size: clamp(2.5rem, 1.5rem + 3.6vw, 4rem);
+    text-wrap: balance;
+  }
+  .hero__title-accent { color: var(--accent); }
+
+  .hero__lede { margin-top: var(--s-5); max-width: 52ch; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+
+  .hero__proof {
+    list-style: none; padding: 0; margin: var(--s-6) 0 0;
+    display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-5);
+    font-size: var(--t-sm); color: var(--ink-2);
+  }
+  .hero__proof li { display: inline-flex; align-items: center; gap: 0.5em; }
+  .hero__proof :global(svg) { color: var(--accent); flex: none; }
+
+  .hero__visual { min-width: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__title-accent { animation: none; background-size: 100% 1px; }
+  }
+</style>

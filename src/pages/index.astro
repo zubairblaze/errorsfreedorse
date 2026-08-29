@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import Stats from '../components/home/Stats.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import ServiceCard from '../components/ui/ServiceCard.astro';
+import ProcessLoop from '../components/droste/ProcessLoop.astro';
+import PostCard from '../components/blog/PostCard.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import Icons from '../components/Icons.astro';
+import { services } from '../data/services.ts';
+import { featuredProjects } from '../data/work.ts';
+import { getPosts } from '../data/blog.ts';
+import { site } from '../data/site.ts';
+import { url } from '../lib/url.ts';
+
+const posts = (await getPosts()).slice(0, 3);
+
+/** Placeholder for the client logo wall — swap for real marks when cleared
+ *  for use. Sectors are honest in the meantime; invented logos are not. */
+const sectors = ['Retail & E-commerce', 'Professional Services', 'Logistics', 'Real Estate', 'Healthcare', 'Hospitality', 'Education', 'Manufacturing'];
+---
+
+<BaseLayout
+  title="Home"
+  path="/"
+  description={site.description}
+>
+  <Hero />
+  <Stats />
+
+  <!-- Positioning -->
+  <section class="section">
+    <div class="shell">
+      <div class="two">
+        <SectionHeading
+          eyebrow="Why ErrorsFree"
+          title="Two businesses, one standard."
+          lede="We run a development studio and a SaaS company side by side. The studio keeps us close to real operational problems; the products keep us honest about what it takes to run software once it is live."
+        />
+        <div class="two__body" data-reveal style="--reveal-delay:100ms">
+          <p>
+            Most agencies serving SMEs in the region either build cheap and disappear, or
+            price for enterprise and scope for enterprise. Neither works for a fifteen-person
+            company that needs one thing built properly.
+          </p>
+          <p>
+            We took the opposite approach: fixed timelines, scope that is negotiated out loud,
+            and a verification process borrowed from the products we operate ourselves. You get
+            the code, the documentation and the ability to walk away — which is the only
+            guarantee that actually means anything.
+          </p>
+          <a class="btn btn--ghost" href={url('/about/')}>How we work <Icons name="arrow" size={16} class="arrow" /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="section section--sunken" id="services">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="What we do"
+        title="Four services. One team."
+        lede="No handoffs between agencies, no account manager relaying messages to a developer you never meet."
+      />
+      <div class="grid grid-sm-2 grid-lg-4 svc-grid">
+        {services.map((s, i) => <ServiceCard service={s} index={i} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Process — the Droste concept as an actual method -->
+  <section class="section" id="process">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="Our process"
+        title="We check our work. Then we check the checking."
+        lede="The name is a process commitment, not a slogan. Every release passes through the same loop, and the loop runs until there is nothing left to catch."
+      />
+      <div class="process-wrap" data-reveal>
+        <ProcessLoop />
+      </div>
+    </div>
+  </section>
+
+  <!-- Proof / sector wall -->
+  <section class="section--tight section proof">
+    <div class="shell">
+      <p class="proof__label mono" data-reveal>Building for businesses across</p>
+      <ul class="proof__list" data-reveal style="--reveal-delay:80ms">
+        {sectors.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- SaaS teaser -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <SectionHeading
+        eyebrow="Our products"
+        title="Software we built for ourselves, then sold."
+        lede="Every product below started as an internal tool. That is the filter — we only productise what we already depend on."
+      />
+      <div class="grid grid-md-3 prod-grid">
+        {featuredProjects.map((p, i) => (
+          <article class="card prod" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <p class="prod__sector mono">{p.sector}</p>
+            <h3 class="prod__title">
+              <a href={url(`/work/#${p.slug}`)}>{p.title}<span class="prod__stretch"></span></a>
+            </h3>
+            <p class="prod__summary">{p.summary}</p>
+            <ul class="prod__results">
+              {p.results.map((r) => <li><strong>{r.value}</strong> {r.label}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <p class="prod__more" data-reveal>
+        <a class="btn btn--ghost" href={url('/work/')}>See all work <Icons name="arrow" size={16} class="arrow" /></a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Blog teaser -->
+  <section class="section">
+    <div class="shell">
+      <div class="blog-head">
+        <SectionHeading
+          eyebrow="Field notes"
+          title="What we have learned building this way."
+          lede="Practical writing on AI cost, delivery and the decisions SMEs face before they hire anyone."
+        />
+        <a class="btn btn--ghost blog-head__all" href={url('/blog/')}>All articles <Icons name="arrow" size={16} class="arrow" /></a>
+      </div>
+      <div class="grid grid-md-3 blog-grid">
+        {posts.map((p, i) => <PostCard post={p} index={i} />)}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .two { display: grid; gap: var(--s-6); }
+  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: start; } }
+  .two__body { display: grid; gap: var(--s-4); color: var(--ink-2); justify-items: start; }
+
+  .svc-grid, .prod-grid, .blog-grid { margin-top: var(--s-7); }
+  .svc-grid > * { height: 100%; }
+
+  .process-wrap { margin-top: var(--s-7); }
+
+  .proof__label { font-size: var(--t-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .proof__list {
+    list-style: none; padding: 0; margin: var(--s-4) 0 0;
+    display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3);
+  }
+  .proof__list li {
+    font-size: var(--t-sm); color: var(--ink-2);
+    padding: 0.45em 1em; border: 1px solid var(--line); border-radius: var(--r-full);
+    background: var(--bg-2);
+  }
+
+  .prod { display: flex; flex-direction: column; gap: var(--s-3); }
+  .prod__sector { font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+  .prod__title { margin: 0; font-size: var(--t-lg); }
+  .prod__title a { color: var(--ink); }
+  .prod__stretch { position: absolute; inset: 0; z-index: 2; }
+  .prod__summary { color: var(--ink-2); font-size: var(--t-sm); flex: 1; }
+  .prod__results { list-style: none; padding: var(--s-3) 0 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-4); border-top: 1px solid var(--line); font-size: var(--t-xs); color: var(--ink-3); }
+  .prod__results strong { color: var(--ink); font-family: var(--font-display); font-weight: 600; }
+  .prod__more { margin-top: var(--s-6); }
+
+  .blog-head { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: end; justify-content: space-between; }
+  .blog-head__all { flex: none; }
+</style>

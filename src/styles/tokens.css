@@ -1,0 +1,158 @@
+/* =====================================================================
+   ErrorsFree — design tokens
+   ---------------------------------------------------------------------
+   Every colour in this codebase resolves through a token below. No
+   component hardcodes a hex value, which is what makes the runtime
+   palette switcher possible: swapping [data-palette] on <html> restyles
+   the whole site with no reflow and no JS beyond one attribute write.
+
+   Structure:
+     :root                                -> palette-independent scales
+     [data-palette="x"]                   -> that palette, LIGHT
+     [data-palette="x"][data-theme=dark]  -> that palette, DARK
+
+   Contrast: --ink on --bg and --on-accent on --accent are held at
+   WCAG AA (>= 4.5:1) in all eight combinations.
+   ===================================================================== */
+
+:root {
+  /* ---- Type ---------------------------------------------------- */
+  --font-display: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Fluid scale: min at 360px, max at 1400px. */
+  --t-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --t-sm: clamp(0.8125rem, 0.78rem + 0.16vw, 0.9375rem);
+  --t-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --t-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --t-xl: clamp(1.25rem, 1.13rem + 0.55vw, 1.5rem);
+  --t-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 2.125rem);
+  --t-3xl: clamp(1.875rem, 1.5rem + 1.7vw, 3rem);
+  --t-4xl: clamp(2.25rem, 1.6rem + 2.9vw, 4.25rem);
+  --t-5xl: clamp(2.6rem, 1.6rem + 4.4vw, 5.75rem);
+
+  /* ---- Space --------------------------------------------------- */
+  --s-1: 0.25rem;  --s-2: 0.5rem;   --s-3: 0.75rem;  --s-4: 1rem;
+  --s-5: 1.5rem;   --s-6: 2rem;     --s-7: 3rem;     --s-8: 4rem;
+  --s-9: 6rem;     --s-10: 8rem;
+  --section-y: clamp(3.5rem, 2rem + 7vw, 8rem);
+  --gutter: clamp(1.15rem, 0.6rem + 2.4vw, 2.5rem);
+  --measure: 68ch;
+  --shell: 78rem;
+  --shell-wide: 88rem;
+
+  /* ---- Shape --------------------------------------------------- */
+  --r-1: 4px; --r-2: 8px; --r-3: 12px; --r-4: 18px; --r-5: 26px; --r-full: 999px;
+  --hair: 1px;
+
+  /* ---- Motion -------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 140ms; --dur-2: 260ms; --dur-3: 480ms; --dur-4: 900ms;
+
+  /* ---- Droste ---------------------------------------------------
+     Single source of truth for the recursion motif. Depth is capped
+     here and lowered at mobile breakpoints (see base.css) so the
+     effect never costs more than it gives.                          */
+  --droste-depth: 5;          /* documentation; loops are authored to match */
+  --droste-scale: 0.615;      /* each level shrinks to ~62% of its parent  */
+  --droste-rotate: 5deg;      /* cumulative twist per level                */
+  --droste-spin: 26s;         /* signature slow rotation                   */
+}
+
+/* =====================================================================
+   PALETTE 1 — MERIDIAN
+   Dell-adjacent: one confident corporate blue, deep navy ink, generous
+   white. Reads institutional and trustworthy; the safest conversion bet.
+   ===================================================================== */
+[data-palette="meridian"] {
+  --bg: #ffffff;      --bg-2: #f4f8fc;   --bg-3: #e8f0f9;
+  --line: #dbe6f2;    --line-2: #bed1e8;
+  --ink: #051726;     --ink-2: #31506c;  --ink-3: #6a8199;
+  --accent: #0967c6;  --accent-2: #0f88f0; --accent-soft: #eaf3fd;
+  --on-accent: #ffffff;
+  --glow: 10 110 209;
+  --shadow: 5 23 38;
+}
+[data-palette="meridian"][data-theme="dark"] {
+  --bg: #050c15;      --bg-2: #0a1524;   --bg-3: #0f1e31;
+  --line: #17293f;    --line-2: #24425f;
+  --ink: #eaf2fa;     --ink-2: #9db4cc;  --ink-3: #6b8199;
+  --accent: #3d9bff;  --accent-2: #74baff; --accent-soft: #0e2137;
+  --on-accent: #03121f;
+  --glow: 61 155 255;
+  --shadow: 0 0 0;
+}
+
+/* =====================================================================
+   PALETTE 2 — OBSIDIAN
+   Near-black with an electric lime signal. Reads like a developer tool:
+   sharp, technical, high-contrast. Most distinctive, least corporate.
+   ===================================================================== */
+[data-palette="obsidian"] {
+  --bg: #ffffff;      --bg-2: #f6f7f3;   --bg-3: #edefe7;
+  --line: #e0e3d8;    --line-2: #c6ccba;
+  --ink: #0b0e0a;     --ink-2: #3f463b;  --ink-3: #71796a;
+  --accent: #4a7a0a;  --accent-2: #5d980f; --accent-soft: #eff7e0;
+  --on-accent: #ffffff;
+  --glow: 93 152 15;
+  --shadow: 11 14 10;
+}
+[data-palette="obsidian"][data-theme="dark"] {
+  --bg: #08090a;      --bg-2: #101211;   --bg-3: #171a17;
+  --line: #232722;    --line-2: #3a4136;
+  --ink: #f0f3ec;     --ink-2: #a8b1a0;  --ink-3: #767e70;
+  --accent: #b6f03c;  --accent-2: #d0fa7a; --accent-soft: #17200a;
+  --on-accent: #0a1002;
+  --glow: 182 240 60;
+  --shadow: 0 0 0;
+}
+
+/* =====================================================================
+   PALETTE 3 — DUNE
+   Ink and warm gold. Reads Gulf-premium — the palette of a regional
+   firm that charges properly. Warmest and most editorial of the four.
+   ===================================================================== */
+[data-palette="dune"] {
+  --bg: #fdfbf7;      --bg-2: #f6f1e6;   --bg-3: #eee6d6;
+  --line: #e3d8c3;    --line-2: #cfbfa1;
+  --ink: #161109;     --ink-2: #4a3e2c;  --ink-3: #7a6b54;
+  --accent: #8a6712;  --accent-2: #a88129; --accent-soft: #f7eedb;
+  --on-accent: #ffffff;
+  --glow: 168 129 41;
+  --shadow: 22 17 9;
+}
+[data-palette="dune"][data-theme="dark"] {
+  --bg: #0d0a06;      --bg-2: #16110a;   --bg-3: #1f180f;
+  --line: #2e2416;    --line-2: #493819;
+  --ink: #f5eee1;     --ink-2: #bfae93;  --ink-3: #8b7b63;
+  --accent: #e3b857;  --accent-2: #f4d189; --accent-soft: #241a0b;
+  --on-accent: #1a1205;
+  --glow: 227 184 87;
+  --shadow: 0 0 0;
+}
+
+/* =====================================================================
+   PALETTE 4 — QUANTUM
+   Indigo into violet. Reads AI-native and contemporary; the palette
+   that most signals "we build with models", least signals "enterprise".
+   ===================================================================== */
+[data-palette="quantum"] {
+  --bg: #ffffff;      --bg-2: #f7f6fd;   --bg-3: #efedfb;
+  --line: #e1ddf7;    --line-2: #c9c2ee;
+  --ink: #0e0b1c;     --ink-2: #423a63;  --ink-3: #6e6790;
+  --accent: #5b45d9;  --accent-2: #7c5cf0; --accent-soft: #eeebfd;
+  --on-accent: #ffffff;
+  --glow: 124 92 240;
+  --shadow: 14 11 28;
+}
+[data-palette="quantum"][data-theme="dark"] {
+  --bg: #07060d;      --bg-2: #0e0c1a;   --bg-3: #151228;
+  --line: #221e3b;    --line-2: #352e5b;
+  --ink: #efebfa;     --ink-2: #a9a0c9;  --ink-3: #7a719b;
+  --accent: #9b85ff;  --accent-2: #c3b2ff; --accent-soft: #16112b;
+  --on-accent: #0a0617;
+  --glow: 155 133 255;
+  --shadow: 0 0 0;
+}

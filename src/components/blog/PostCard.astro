@@ -1,0 +1,80 @@
+---
+/**
+ * Blog card. Consumes a `Post` exactly as the API will return it, so
+ * Phase 2 changes nothing here.
+ */
+import { url } from '../../lib/url.ts';
+import { formatDate, type Post } from '../../data/blog.ts';
+interface Props {
+  post: Post;
+  index?: number;
+  featured?: boolean;
+  /** Heading level for the card title — 2 where no section heading
+      precedes the grid, 3 beneath one. */
+  level?: 2 | 3;
+}
+const { post, index = 0, featured = false, level = 3 } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+<article class:list={['card pcard', featured && 'pcard--featured']} data-reveal style={`--reveal-delay:${index * 70}ms`}>
+  <div class="pcard__thumb" aria-hidden="true">
+    {post.featured_image
+      ? <img src={url(post.featured_image)} alt="" loading="lazy" decoding="async" width="640" height="360" />
+      : (
+        /* No image yet: a generated nested-frame plate keyed to the post id,
+           so the grid stays composed until the CMS supplies real artwork. */
+        <div class="pcard__plate" style={`--seed:${post.id}`}>
+          <span class="pcard__ring" style="--i:0"></span>
+          <span class="pcard__ring" style="--i:1"></span>
+          <span class="pcard__ring" style="--i:2"></span>
+          <span class="pcard__ring" style="--i:3"></span>
+        </div>
+      )}
+  </div>
+
+  <div class="pcard__body">
+    <p class="pcard__meta mono">
+      <span class="pcard__cat">{post.category}</span>
+      <span aria-hidden="true">·</span>
+      <time datetime={post.published_at}>{formatDate(post.published_at)}</time>
+      <span aria-hidden="true">·</span>
+      <span>{post.read_minutes} min</span>
+    </p>
+    <Heading class="pcard__title">
+      <a href={url(`/blog/${post.slug}/`)}>{post.title}<span class="pcard__stretch"></span></a>
+    </Heading>
+    <p class="pcard__excerpt">{post.excerpt}</p>
+  </div>
+</article>
+
+<style>
+  .pcard { display: flex; flex-direction: column; padding: 0; gap: 0; overflow: hidden; }
+  .pcard__thumb { position: relative; aspect-ratio: 16 / 9; background: var(--bg-3); overflow: hidden; border-bottom: 1px solid var(--line); }
+  .pcard__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  .pcard__plate { position: absolute; inset: 0; display: grid; place-items: center;
+    background: radial-gradient(ellipse 70% 70% at 50% 45%, rgb(var(--glow) / 0.13), transparent 70%); }
+  .pcard__ring {
+    position: absolute; inset: calc(14% + var(--i) * 9%);
+    border: 1px solid var(--line-2); border-radius: 14%;
+    transform: rotate(calc((var(--i) + var(--seed)) * var(--droste-rotate)));
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .pcard__ring:last-child { border-color: var(--accent); opacity: 0.7; }
+  .pcard:hover .pcard__ring { transform: rotate(calc((var(--i) + var(--seed)) * var(--droste-rotate) * 2)) scale(1.04); }
+
+  .pcard__body { padding: var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); flex: 1; }
+  .pcard__meta { display: flex; flex-wrap: wrap; gap: 0.5em; font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.04em; }
+  .pcard__cat { color: var(--accent); }
+  .pcard__title { margin: 0; font-size: var(--t-lg); line-height: 1.25; letter-spacing: -0.018em; }
+  .pcard__title a { color: var(--ink); }
+  .pcard__stretch { position: absolute; inset: 0; z-index: 2; }
+  .pcard__excerpt { color: var(--ink-2); font-size: var(--t-sm); line-height: 1.6; }
+
+  @media (min-width: 900px) {
+    .pcard--featured { grid-column: span 2; flex-direction: row; }
+    .pcard--featured .pcard__thumb { aspect-ratio: auto; width: 46%; flex: none; border-bottom: 0; border-inline-end: 1px solid var(--line); }
+    .pcard--featured .pcard__body { justify-content: center; padding: var(--s-6); }
+    .pcard--featured .pcard__title { font-size: var(--t-2xl); }
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+import Icons from '../Icons.astro';
+import { url } from '../../lib/url.ts';
+import type { Service } from '../../data/services.ts';
+interface Props {
+  service: Service;
+  index?: number;
+  /** Heading level for the card title. Use 2 where no section heading
+      precedes the grid, so the document never skips a level. */
+  level?: 2 | 3;
+}
+const { service, index = 0, level = 3 } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+<article class="card svc card--link" data-reveal style={`--reveal-delay:${index * 70}ms`}>
+  <span class="svc__icon"><Icons name={service.icon} size={26} /></span>
+  <Heading class="svc__title">
+    <a href={url(`/services/${service.slug}/`)} class="svc__link">
+      {service.title}<span class="svc__stretch"></span>
+    </a>
+  </Heading>
+  <p class="svc__excerpt">{service.excerpt}</p>
+  <p class="svc__more mono">Explore <Icons name="arrow" size={14} /></p>
+</article>
+<style>
+  .svc { display: flex; flex-direction: column; gap: var(--s-3); min-height: 100%; }
+  .svc__icon {
+    display: grid; place-items: center;
+    width: 3rem; height: 3rem; border-radius: var(--r-3);
+    background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--line);
+    margin-bottom: var(--s-2);
+  }
+  .svc__title { margin: 0; font-size: var(--t-xl); letter-spacing: -0.018em; line-height: 1.2; }
+  .svc__link { color: var(--ink); }
+  /* Whole card is the target; the link keeps the accessible name. */
+  .svc__stretch { position: absolute; inset: 0; z-index: 2; }
+  .svc__excerpt { color: var(--ink-2); font-size: var(--t-sm); flex: 1; }
+  .svc__more {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); margin-top: var(--s-2);
+  }
+  .svc:hover .svc__more :global(svg) { transform: translateX(3px); }
+  .svc__more :global(svg) { transition: transform var(--dur-2) var(--ease-out); }
+</style>

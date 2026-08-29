@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icons from '../../components/Icons.astro';
+import { projects } from '../../data/work.ts';
+---
+<BaseLayout
+  title="Work"
+  path="/work/"
+  description="Case studies and SaaS products built by ErrorsFree — applicant tracking, security scanning, social analysis and custom client software."
+>
+  <PageHero
+    eyebrow="Work"
+    title="What we have built, and what it was for."
+    lede="Our own products and selected client engagements. Where a client's name is confidential we describe the sector and the problem instead of inventing a logo."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <div class="grid grid-md-2 work">
+        {projects.map((p, i) => (
+          <article class="card proj" id={p.slug} data-reveal style={`--reveal-delay:${(i % 2) * 70}ms`}>
+            <div class="proj__plate" aria-hidden="true">
+              <span class="proj__ring" style="--i:0"></span>
+              <span class="proj__ring" style="--i:1"></span>
+              <span class="proj__ring" style="--i:2"></span>
+              <span class="proj__ring" style="--i:3"></span>
+              <span class="proj__initial">{p.title.charAt(0)}</span>
+            </div>
+
+            <div class="proj__body">
+              <p class="proj__meta mono">
+                <span>{p.sector}</span><span aria-hidden="true">·</span><span>{p.year}</span>
+              </p>
+              <h2 class="proj__title">{p.title}</h2>
+              <p class="proj__client mono">{p.client}</p>
+              <p class="muted proj__summary">{p.summary}</p>
+
+              <ul class="proj__services">
+                {p.services.map((s) => <li>{s}</li>)}
+              </ul>
+
+              <dl class="proj__results">
+                {p.results.map((r) => (
+                  <div><dt>{r.label}</dt><dd>{r.value}</dd></div>
+                ))}
+              </dl>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <p class="work__note muted" data-reveal>
+        <Icons name="check" size={16} />
+        Detailed case studies are available on request under NDA — ask on your first call.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Want something like this for your business?"
+    body="Bring us the problem rather than the specification. Working out what to build is the part we are best at."
+  />
+</BaseLayout>
+
+<style>
+  .proj { display: flex; flex-direction: column; padding: 0; overflow: hidden; scroll-margin-top: 6rem; }
+
+  .proj__plate {
+    position: relative; aspect-ratio: 16 / 7;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 50%, rgb(var(--glow) / 0.14), transparent 70%),
+      var(--bg-3);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .proj__ring {
+    position: absolute; width: 62%; aspect-ratio: 1;
+    border: 1px solid var(--line-2); border-radius: 18%;
+    transform: scale(calc(1 - var(--i) * 0.19)) rotate(calc(var(--i) * var(--droste-rotate) * 2));
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .proj__ring:last-child { border-color: var(--accent); }
+  .proj:hover .proj__ring { transform: scale(calc(1.06 - var(--i) * 0.19)) rotate(calc(var(--i) * var(--droste-rotate) * 3.4)); }
+  .proj__initial {
+    position: relative;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: var(--t-3xl); color: var(--accent); letter-spacing: -0.04em;
+  }
+
+  .proj__body { padding: var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); flex: 1; }
+  .proj__meta { display: flex; gap: 0.55em; font-size: var(--t-xs); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
+  .proj__title { font-size: var(--t-xl); }
+  .proj__client { font-size: var(--t-xs); color: var(--accent); letter-spacing: 0.05em; }
+  .proj__summary { font-size: var(--t-sm); flex: 1; }
+
+  .proj__services { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .proj__services li {
+    font-size: var(--t-xs); padding: 0.35em 0.8em;
+    border: 1px solid var(--line); border-radius: var(--r-full); color: var(--ink-2);
+  }
+
+  .proj__results { display: flex; flex-wrap: wrap; gap: var(--s-5); margin: 0; padding-top: var(--s-4); border-top: 1px solid var(--line); }
+  .proj__results dt { font-size: var(--t-xs); color: var(--ink-3); }
+  .proj__results dd { margin: 0.15em 0 0; font-family: var(--font-display); font-weight: 600; font-size: var(--t-base); }
+
+  .work__note { display: flex; gap: 0.6em; align-items: center; margin-top: var(--s-6); font-size: var(--t-sm); }
+  .work__note :global(svg) { color: var(--accent); flex: none; }
+</style>
