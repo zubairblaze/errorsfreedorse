@@ -15,3 +15,5 @@ dbg.mjs
 
 # Generated photography — fetch with scripts/download-images.sh
 public/images/*.webp
+xampp-package/
+*-xampp.zip

@@ -22,7 +22,7 @@ use ErrorsFree\Database;
 use ErrorsFree\PublicApi;
 use ErrorsFree\Security;
 
-require dirname(__DIR__, 2) . '/src/bootstrap.php';
+require __DIR__ . '/../_bootstrap.php';
 
 Security::headers();
 header('Content-Type: application/json; charset=utf-8');

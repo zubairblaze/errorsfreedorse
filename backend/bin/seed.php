@@ -15,7 +15,10 @@ declare(strict_types=1);
 use ErrorsFree\Database;
 use ErrorsFree\Security;
 
-if (PHP_SAPI !== 'cli') {
+// CLI only, with one exception: the web installer requires this file
+// in-process, because shelling out to PHP is blocked on many shared hosts.
+// The installer is itself localhost-only and self-locking.
+if (PHP_SAPI !== 'cli' && !defined('EF_INSTALLER')) {
     http_response_code(403);
     exit("This script runs from the command line only.\n");
 }
@@ -188,9 +191,15 @@ try {
     }
 
     $pdo->commit();
-    fwrite(STDOUT, "Seeded: {$posts} posts, {$cases} case studies, {$svcs} services, {$apps} apps.\n");
+    $summary = "Seeded: {$posts} posts, {$cases} case studies, {$svcs} services, {$apps} apps.";
+    if (defined('EF_INSTALLER')) { echo $summary; } else { fwrite(STDOUT, $summary . "\n"); }
 } catch (\Throwable $e) {
     $pdo->rollBack();
+    // Under the installer, throw so the wizard can show the message in the
+    // page rather than exiting mid-response with a blank screen.
+    if (defined('EF_INSTALLER')) {
+        throw new RuntimeException('Seed failed, nothing written: ' . $e->getMessage(), 0, $e);
+    }
     fwrite(STDERR, 'Seed failed, nothing written: ' . $e->getMessage() . "\n");
     exit(1);
 }

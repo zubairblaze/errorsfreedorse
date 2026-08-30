@@ -13,7 +13,8 @@
     "images": "node scripts/generate-images.mjs",
     "package": "npm run build && node scripts/package.mjs",
     "fetch-fonts": "node scripts/fetch-fonts.mjs",
-    "package:local": "node scripts/package-local.mjs"
+    "package:local": "node scripts/package-local.mjs",
+    "package:xampp": "node scripts/package-xampp.mjs"
   },
   "dependencies": {
     "astro": "^7.2.9"

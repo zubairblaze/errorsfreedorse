@@ -20,7 +20,7 @@ use ErrorsFree\Uploads;
 use ErrorsFree\View;
 use function ErrorsFree\url_for;
 
-require dirname(__DIR__, 2) . '/src/bootstrap.php';
+require __DIR__ . '/../_bootstrap.php';
 
 Security::headers(admin: true);
 Auth::startSession();
