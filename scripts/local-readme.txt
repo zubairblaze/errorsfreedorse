@@ -1,82 +1,92 @@
 ErrorsFree — local test build
 =============================
 
-This is the whole site, built to run from the root of a server rather than
-a subfolder, so it previews cleanly on your machine.
+  START HERE
+  ----------
+  Mac / Linux : double-click  start-mac-linux.command
+  Windows     : double-click  start-windows.bat
+  Any OS      : open a terminal in this folder and run:  node start.mjs
 
-  IMPORTANT: do not double-click site/index.html. A static site still needs
-  a server to resolve /about/ -> /about/index.html. Opening it as a file
-  gives you an unstyled page. Use one of the three options below instead —
-  each takes about five seconds.
-
-
-OPTION 1 — Node  (recommended, nothing to install)
---------------------------------------------------
-  Mac / Linux:  double-click  start-mac-linux.command
-                or in Terminal:  node start.mjs
-  Windows:      double-click  start-windows.bat
-                or in Command Prompt:  node start.mjs
-
-  Then open  http://localhost:8080
-  Stop it with Ctrl+C.
-
-  Port already busy?   PORT=8081 node start.mjs
+  It prints a URL and opens your browser. Read the port in that URL.
 
 
-OPTION 2 — Python  (already on every Mac and Linux machine)
------------------------------------------------------------
-  cd site
-  python3 -m http.server 8080
+IF YOU SEE YOUR OLD SITE
+------------------------
+You are looking at a different server, not this preview. Almost always XAMPP.
 
-  Then open  http://localhost:8080
+  * XAMPP's Apache usually sits on port 80 or 8080. This preview deliberately
+    avoids both — it starts at 4321 and moves up until it finds a free port.
+  * So check the address bar. If it does not say the port the terminal
+    printed, you are on the wrong server.
+  * Hard-reload once you are on the right URL: Ctrl+Shift+R (Cmd+Shift+R on
+    a Mac). A normal reload can serve a cached copy.
+
+  How to tell instantly that you have the RIGHT build:
+    - "Case Studies" appears in the top navigation.
+    - The hero image is a browser window containing itself, and it moves as
+      you scroll.
+    - BUILD.txt in this folder names the build.
+
+  Do NOT open site/index.html by double-clicking it. A static site still
+  needs a server to resolve /about/ into /about/index.html; opened as a file
+  you get an unstyled page.
 
 
-OPTION 3 — PHP  (if you have it locally for cPanel work)
---------------------------------------------------------
-  cd site
-  php -S localhost:8080
+NO NODE INSTALLED?
+------------------
+Either of these works just as well. Run it from inside the site folder:
 
-  Then open  http://localhost:8080
+  cd site && python3 -m http.server 4321
+  cd site && php -S localhost:4321
+
+Then open http://localhost:4321
 
 
 WHAT TO LOOK AT
 ---------------
+  * The hero. Scroll slowly. It is a browser window showing itself, falling
+    toward you without end — the frames recycle, so it never bottoms out.
+    Move the mouse across it too.
+
+  * "Our Process", further down the home page. It pins for three screens and
+    flies you through Build > Test > Refine > Repeat and back into Build.
+    The loop closing on itself is the point.
+
   * The Palette button, bottom-right of every page. Four colour directions,
-    each in light and dark — eight looks. Your pick decides the brand.
+    each in light and dark. Your pick decides the brand.
       Meridian  corporate blue, the Dell register. Safest for conversion.
       Obsidian  near-black + electric lime. Developer-tool sharp.
       Dune      ink + warm gold. Gulf-premium.
       Quantum   indigo into violet. AI-native.
-    Your choice is remembered as you move between pages.
+    The choice follows you between pages.
 
-  * The hero. Move your mouse across it and scroll — the nested frames
-    drift on both. It is a browser window showing itself, five levels deep,
-    drawn in CSS rather than exported as images.
-
-  * The reload. Refresh in a new browser tab or window for the zoom-through
-    intro; it only plays once per session, on purpose.
-
-  * Our Process, on the home page and /about/. Hover the four steps and
-    watch the matching ring light up. Left alone, it cycles on its own.
-
-  * /blog/ — filter by category. /blog/<any post> — the post template.
-  * /contact/ — submit it empty, then with a bad email. Validation is
-    frontend-only in Phase 1; nothing is sent anywhere.
-  * /services/ai-integration/ — a full service detail page.
+  * /case-studies/ — the new section. Index plus a full case study.
+  * /blog/ — filter by category.  /contact/ — submit it empty, then with a
+    bad email. Validation is frontend-only here; nothing is sent anywhere.
   * Any wrong URL, e.g. /nope/ — the 404.
 
-  * Resize the window down to phone width. The hero recursion drops from
-    five levels to three, and the menu becomes a sheet.
+  * Resize to phone width. The hero recursion drops from five levels to
+    three and the menu becomes a sheet.
 
   * If your OS is set to reduce motion, every nested visual keeps its
     geometry and simply stops moving. Nothing disappears.
 
 
+PHOTOGRAPHY
+-----------
+Cards currently show generated nested-frame plates rather than photographs.
+Twelve images exist but are not in this zip. From the project source run:
+
+  bash scripts/download-images.sh && npm run build
+
+Missing images always fall back to the plates, so nothing ever looks broken.
+
+
 NOTE ON THIS BUILD
 ------------------
-This copy is built for a server ROOT so it previews easily. The zip for
-cPanel is built for a nested subfolder and is a separate file — do not
-upload this one. Rebuild the deploy copy any time with:
+This copy is built to run from a server ROOT so it previews easily. The
+cPanel upload is a different build and a separate file — do not upload this
+one. Rebuild the deploy copy with:
 
   SITE_BASE=/errorsfree npm run build
 
