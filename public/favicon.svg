@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- ErrorsFree mark: a disc containing a square, containing a smaller
+       square, containing a point. Colours are fixed here because a favicon
+       renders outside the page and cannot read CSS custom properties. -->
+  <circle cx="20" cy="20" r="20" fill="#0967c6"/>
+  <g fill="none" stroke="#ffffff" stroke-linejoin="round">
+    <rect x="9.5" y="9.5" width="21" height="21" rx="5" stroke-width="2.4" transform="rotate(15 20 20)"/>
+    <rect x="13.6" y="13.6" width="12.8" height="12.8" rx="3.1" stroke-width="1.9" transform="rotate(30 20 20)"/>
+  </g>
+  <circle cx="20" cy="20" r="2.3" fill="#ffffff"/>
+</svg>

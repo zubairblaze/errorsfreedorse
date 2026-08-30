@@ -1,0 +1,26 @@
+{
+  "name": "errorsfree-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ErrorsFree — AI-first app development for GCC SMEs. Static marketing site.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/postbuild.mjs",
+    "build:root": "SITE_BASE=/ astro build && SITE_BASE=/ node scripts/postbuild.mjs",
+    "preview": "astro preview",
+    "check": "astro check",
+    "images": "node scripts/generate-images.mjs",
+    "package": "npm run build && node scripts/package.mjs",
+    "fetch-fonts": "node scripts/fetch-fonts.mjs",
+    "package:local": "node scripts/package-local.mjs",
+    "package:xampp": "node scripts/package-xampp.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "sharp": "^0.35.4"
+  }
+}

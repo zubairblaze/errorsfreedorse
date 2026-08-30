@@ -1,0 +1,99 @@
+---
+/**
+ * Blog index. Reads through the async data layer, so Phase 2 needs to
+ * change nothing here beyond the implementation of getPosts().
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { getPosts, getCategories } from '../../data/blog.ts';
+
+const posts = await getPosts();
+const categories = await getCategories();
+const [lead, ...rest] = posts;
+---
+<BaseLayout
+  title="Field notes"
+  path="/blog/"
+  description="Practical writing on AI cost, delivery, and the software decisions facing small and medium businesses in the GCC."
+>
+  <PageHero
+    eyebrow="Field notes"
+    title="What we have learned building this way."
+    lede="No thought-leadership. Cost models, process detail and the occasional account of getting something wrong."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <!-- Category filter. Client-side in Phase 1; becomes a query
+           parameter against the API in Phase 2 with no markup change. -->
+      <div class="filters" data-blog-filters data-reveal>
+        <button type="button" class="filters__btn is-on" data-filter="all" aria-pressed="true">
+          All <span class="filters__count">{posts.length}</span>
+        </button>
+        {categories.map((c) => (
+          <button type="button" class="filters__btn" data-filter={c.name} aria-pressed="false">
+            {c.name} <span class="filters__count">{c.count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid grid-md-2 posts" data-blog-grid>
+        {lead && <div data-cat={lead.category}><PostCard post={lead} featured level={2} /></div>}
+        {rest.map((p, i) => <div data-cat={p.category}><PostCard post={p} index={i} level={2} /></div>)}
+      </div>
+
+      <p class="posts__empty" data-blog-empty hidden>No articles in that category yet.</p>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Have a question these do not answer?"
+    body="Ask it directly. We would rather have the conversation than write another article about it."
+  />
+</BaseLayout>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-6); }
+  .filters__btn {
+    display: inline-flex; align-items: center; gap: 0.5em;
+    padding: 0.5em 1em; border-radius: var(--r-full);
+    border: 1px solid var(--line); background: var(--bg-2);
+    font-size: var(--t-sm); color: var(--ink-2);
+    transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
+  }
+  .filters__btn:hover { border-color: var(--line-2); color: var(--ink); }
+  .filters__btn.is-on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .filters__count { font-family: var(--font-mono); font-size: var(--t-xs); opacity: 0.65; }
+
+  .posts > * { min-width: 0; }
+  .posts > * > :global(.pcard) { height: 100%; }
+  .posts__empty { color: var(--ink-3); padding: var(--s-7) 0; text-align: center; }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('[data-blog-filters]');
+  const grid = document.querySelector<HTMLElement>('[data-blog-grid]');
+  const empty = document.querySelector<HTMLElement>('[data-blog-empty]');
+
+  wrap?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+    if (!btn || !grid) return;
+
+    wrap.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+
+    const want = btn.dataset.filter;
+    let shown = 0;
+    grid.querySelectorAll<HTMLElement>('[data-cat]').forEach((item) => {
+      const show = want === 'all' || item.dataset.cat === want;
+      item.hidden = !show;
+      if (show) shown++;
+    });
+    if (empty) empty.hidden = shown > 0;
+  });
+</script>

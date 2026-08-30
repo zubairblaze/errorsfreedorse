@@ -1,0 +1,140 @@
+---
+/**
+ * Blog post template. Every field it renders maps to a column in the
+ * planned `posts` table; `body` is injected as stored HTML exactly as a
+ * CMS would supply it.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icons from '../../components/Icons.astro';
+import { getPosts, getPostBySlug, getRelatedPosts, getAuthor, formatDate } from '../../data/blog.ts';
+import { url, absUrl, metaDescription } from '../../lib/url.ts';
+import { site } from '../../data/site.ts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const author = await getAuthor(post.author_id);
+const related = await getRelatedPosts(post);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description: post.excerpt,
+  datePublished: post.published_at,
+  dateModified: post.updated_at,
+  author: { '@type': 'Person', name: author.name },
+  publisher: { '@type': 'Organization', name: site.name, url: absUrl('/') },
+  mainEntityOfPage: absUrl(`/blog/${post.slug}/`),
+  keywords: post.tags.join(', '),
+};
+---
+<BaseLayout
+  title={post.title}
+  path={`/blog/${post.slug}/`}
+  description={metaDescription(post.excerpt)}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article class="post">
+    <header class="post__head">
+      <div class="wash" aria-hidden="true"></div>
+      <div class="shell post__head-inner">
+        <nav class="post__crumbs" aria-label="Breadcrumb">
+          <a href={url('/blog/')}>Field notes</a>
+          <span aria-hidden="true">/</span>
+          <span>{post.category}</span>
+        </nav>
+
+        <h1 class="post__title">{post.title}</h1>
+        <p class="lede post__excerpt">{post.excerpt}</p>
+
+        <div class="post__meta">
+          <span class="post__avatar" aria-hidden="true">{author.name.charAt(0)}</span>
+          <div>
+            <p class="post__author">{author.name}</p>
+            <p class="post__sub mono">
+              {author.role} · <time datetime={post.published_at}>{formatDate(post.published_at)}</time> · {post.read_minutes} min read
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell post__body-wrap">
+      <div class="post__body" set:html={post.body} />
+
+      <footer class="post__footer">
+        <ul class="post__tags">
+          {post.tags.map((t) => <li class="mono">#{t}</li>)}
+        </ul>
+        <a class="btn btn--ghost" href={url('/blog/')}>
+          <Icons name="arrow" size={16} /> All field notes
+        </a>
+      </footer>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="section section--sunken">
+      <div class="shell">
+        <h2 class="rel__title" data-reveal>Related reading</h2>
+        <div class="grid grid-md-3">
+          {related.map((r, i) => <PostCard post={r} index={i} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .post__head { position: relative; overflow: hidden; padding-block: clamp(3rem, 2rem + 6vw, 6rem) var(--s-7); border-bottom: 1px solid var(--line); }
+  .post__head-inner { position: relative; z-index: 1; max-width: 48rem; }
+  .post__crumbs { display: flex; gap: 0.6em; font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .post__crumbs a { color: var(--accent); }
+  .post__title { margin-top: var(--s-4); font-size: var(--t-3xl); }
+  .post__excerpt { margin-top: var(--s-4); }
+
+  .post__meta { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-6); }
+  .post__avatar {
+    display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent);
+    font-family: var(--font-display); font-weight: 600;
+  }
+  .post__author { font-weight: 600; font-size: var(--t-sm); }
+  .post__sub { font-size: var(--t-xs); color: var(--ink-3); }
+
+  .post__body-wrap { padding-block: var(--s-7) var(--s-8); }
+  .post__body { max-width: 44rem; font-size: var(--t-lg); line-height: 1.75; color: var(--ink-2); }
+  .post__body :global(h2) {
+    font-size: var(--t-xl); color: var(--ink); margin-top: 2.2em; margin-bottom: 0.7em;
+    padding-top: 0.9em; border-top: 1px solid var(--line);
+  }
+  .post__body :global(h3) { font-size: var(--t-lg); color: var(--ink); margin-top: 1.8em; margin-bottom: 0.5em; }
+  .post__body :global(p) { margin-bottom: 1.1em; }
+  .post__body :global(ul), .post__body :global(ol) { margin: 0 0 1.3em; padding-inline-start: 1.4em; display: grid; gap: 0.6em; }
+  .post__body :global(li)::marker { color: var(--accent); }
+  .post__body :global(strong) { color: var(--ink); font-weight: 600; }
+  .post__body :global(code) {
+    font-family: var(--font-mono); font-size: 0.86em;
+    background: var(--bg-3); padding: 0.15em 0.42em; border-radius: var(--r-1); color: var(--ink);
+  }
+  .post__body :global(a) { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+  .post__footer {
+    max-width: 44rem; margin-top: var(--s-7); padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between;
+  }
+  .post__tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .post__tags li { font-size: var(--t-xs); color: var(--ink-3); }
+
+  .rel__title { font-size: var(--t-2xl); margin-bottom: var(--s-6); }
+</style>

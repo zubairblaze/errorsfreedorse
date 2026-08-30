@@ -1,0 +1,181 @@
+---
+/**
+ * Case study template. Blog-style long form with a three-act summary
+ * (challenge / approach / outcome) pinned above the body.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Plate from '../../components/ui/Plate.astro';
+import Icons from '../../components/Icons.astro';
+import { getCaseStudies, getRelatedCaseStudies } from '../../data/case-studies.ts';
+import { url, absUrl, metaDescription } from '../../lib/url.ts';
+import { site } from '../../data/site.ts';
+import { formatDate } from '../../data/blog.ts';
+
+export async function getStaticPaths() {
+  const studies = await getCaseStudies();
+  return studies.map((study) => ({ params: { slug: study.slug }, props: { study } }));
+}
+
+const { study } = Astro.props;
+const related = await getRelatedCaseStudies(study);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: study.title,
+  description: study.excerpt,
+  datePublished: study.published_at,
+  dateModified: study.updated_at,
+  author: { '@type': 'Organization', name: site.name },
+  publisher: { '@type': 'Organization', name: site.name, url: absUrl('/') },
+  mainEntityOfPage: absUrl(`/case-studies/${study.slug}/`),
+  about: study.sector,
+};
+---
+<BaseLayout
+  title={study.title}
+  path={`/case-studies/${study.slug}/`}
+  description={metaDescription(study.excerpt)}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article class="cs">
+    <header class="cs__head">
+      <div class="wash" aria-hidden="true"></div>
+      <div class="shell cs__head-inner">
+        <nav class="cs__crumbs" aria-label="Breadcrumb">
+          <a href={url('/case-studies/')}>Case studies</a>
+          <span aria-hidden="true">/</span>
+          <span>{study.sector}</span>
+        </nav>
+        <h1 class="cs__title">{study.title}</h1>
+        <p class="lede cs__excerpt">{study.excerpt}</p>
+        <p class="cs__meta mono">
+          {study.client} · {study.duration} ·
+          <time datetime={study.published_at}>{formatDate(study.published_at)}</time> ·
+          {study.read_minutes} min read
+        </p>
+      </div>
+    </header>
+
+    <div class="shell">
+      <figure class="cs__figure" data-reveal>
+        <Plate image={study.featured_image} alt={study.featured_image_alt} seed={study.id + 2} loading="eager" />
+      </figure>
+
+      <!-- Three-act summary: the whole engagement for anyone who reads
+           nothing else on the page. -->
+      <div class="cs__acts" data-reveal>
+        <div class="cs__act">
+          <h2 class="cs__act-title">The challenge</h2>
+          <p>{study.challenge}</p>
+        </div>
+        <div class="cs__act">
+          <h2 class="cs__act-title">Our approach</h2>
+          <p>{study.approach}</p>
+        </div>
+        <div class="cs__act">
+          <h2 class="cs__act-title">The outcome</h2>
+          <p>{study.outcome}</p>
+        </div>
+      </div>
+
+      <dl class="cs__results" data-reveal>
+        {study.results.map((r) => (
+          <div class="cs__result">
+            <dt>{r.label}</dt>
+            <dd>{r.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="cs__body" set:html={study.body} />
+
+      <footer class="cs__footer">
+        <ul class="cs__services">
+          {study.services.map((s) => <li>{s}</li>)}
+        </ul>
+        <a class="btn btn--ghost" href={url('/case-studies/')}>
+          <Icons name="arrow" size={16} /> All case studies
+        </a>
+      </footer>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="section section--sunken">
+      <div class="shell">
+        <h2 class="rel__title" data-reveal>Related work</h2>
+        <div class="grid grid-md-2">
+          {related.map((r, i) => <CaseCard study={r} index={i} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .cs__head { position: relative; overflow: hidden; padding-block: clamp(3rem, 2rem + 6vw, 6rem) var(--s-7); }
+  .cs__head-inner { position: relative; z-index: 1; max-width: 50rem; }
+  .cs__crumbs { display: flex; gap: 0.6em; font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .cs__crumbs a { color: var(--accent); }
+  .cs__title { margin-top: var(--s-4); font-size: var(--t-3xl); }
+  .cs__excerpt { margin-top: var(--s-4); }
+  .cs__meta { margin-top: var(--s-5); font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.04em; }
+
+  .cs__figure {
+    position: relative; margin: 0 0 var(--s-7); aspect-ratio: 16 / 7;
+    border: 1px solid var(--line); border-radius: var(--r-5);
+    overflow: hidden; background: var(--bg-3);
+  }
+
+  .cs__acts { display: grid; gap: var(--s-5); margin-bottom: var(--s-6); }
+  @media (min-width: 900px) { .cs__acts { grid-template-columns: repeat(3, 1fr); gap: var(--s-6); } }
+  .cs__act { padding-inline-start: var(--s-4); border-inline-start: 2px solid var(--accent); }
+  .cs__act-title {
+    font-family: var(--font-mono); font-weight: 500; font-size: var(--t-xs);
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: var(--s-3);
+  }
+  .cs__act p { color: var(--ink-2); font-size: var(--t-sm); line-height: 1.65; }
+
+  .cs__results {
+    display: flex; flex-wrap: wrap; gap: var(--s-6);
+    margin: 0 0 var(--s-7); padding: var(--s-5);
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-4);
+  }
+  .cs__result dt { font-size: var(--t-xs); color: var(--ink-3); }
+  .cs__result dd {
+    margin: 0.25em 0 0; font-family: var(--font-display); font-weight: 600;
+    font-size: var(--t-xl); letter-spacing: -0.025em; color: var(--ink);
+  }
+
+  .cs__body { max-width: 44rem; font-size: var(--t-lg); line-height: 1.75; color: var(--ink-2); padding-bottom: var(--s-7); }
+  .cs__body :global(h2) {
+    font-size: var(--t-xl); color: var(--ink); margin-top: 2.2em; margin-bottom: 0.7em;
+    padding-top: 0.9em; border-top: 1px solid var(--line);
+  }
+  .cs__body :global(h2:first-child) { margin-top: 0; padding-top: 0; border-top: 0; }
+  .cs__body :global(p) { margin-bottom: 1.1em; }
+  .cs__body :global(ul), .cs__body :global(ol) { margin: 0 0 1.3em; padding-inline-start: 1.4em; display: grid; gap: 0.6em; }
+  .cs__body :global(li)::marker { color: var(--accent); }
+  .cs__body :global(strong) { color: var(--ink); font-weight: 600; }
+  .cs__body :global(em) { color: var(--ink); font-style: italic; }
+
+  .cs__footer {
+    max-width: 44rem; padding-top: var(--s-5); padding-bottom: var(--s-8);
+    border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between;
+  }
+  .cs__services { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .cs__services li {
+    font-size: var(--t-xs); padding: 0.4em 0.9em;
+    border: 1px solid var(--line); border-radius: var(--r-full); color: var(--ink-2); background: var(--bg-2);
+  }
+
+  .rel__title { font-size: var(--t-2xl); margin-bottom: var(--s-6); }
+</style>

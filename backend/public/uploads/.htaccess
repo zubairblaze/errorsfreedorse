@@ -1,0 +1,41 @@
+# Uploads are data, never code.
+#
+# The primary control is the deny-then-allow pair below. It uses only core
+# Apache directives, so it works whether PHP runs as a module, through
+# FPM, or not at all.
+#
+# What was here before opened with a bare `php_flag engine off`. That
+# directive only exists when mod_php is loaded; everywhere else — PHP-FPM
+# and suPHP, which is most modern cPanel — Apache treats it as a syntax
+# error and returns 500 for the entire directory. The uploads folder would
+# have failed closed on every image on the site. Guarded now, and demoted
+# to a bonus rather than the defence.
+
+Options -Indexes -ExecCGI
+
+# Nothing here is readable unless it is one of the four image types the
+# uploader accepts. An attacker who somehow lands a .php here cannot fetch
+# it, whatever the server is willing to execute.
+Require all denied
+
+<FilesMatch "(?i)\.(jpe?g|png|gif|webp)$">
+  Require all granted
+</FilesMatch>
+
+# Belt and braces: strip any handler that would treat these as scripts.
+<IfModule mod_mime.c>
+  RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .shtml
+  RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .shtml
+  AddType text/plain .php .phtml .phps .cgi .pl .py .shtml
+</IfModule>
+
+# And, only where mod_php is actually loaded, turn the interpreter off.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>

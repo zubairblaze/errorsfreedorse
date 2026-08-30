@@ -1,0 +1,124 @@
+---
+import Logo from './Logo.astro';
+import Icons from './Icons.astro';
+import NewsletterForm from './NewsletterForm.astro';
+import { site } from '../data/site.ts';
+import { url } from '../lib/url.ts';
+const year = new Date().getFullYear();
+---
+
+<footer class="ftr">
+  <!-- Watermark: the mark, nested into itself, bleeding off the corner.
+       The last statement of the motif before the page ends. -->
+  <div class="ftr__watermark" aria-hidden="true">
+    <div class="ftr__wm-ring" style="--i:0"></div>
+    <div class="ftr__wm-ring" style="--i:1"></div>
+    <div class="ftr__wm-ring" style="--i:2"></div>
+    <div class="ftr__wm-ring" style="--i:3"></div>
+    <div class="ftr__wm-ring" style="--i:4"></div>
+  </div>
+
+  <div class="shell-wide ftr__inner">
+    <div class="ftr__top">
+      <div class="ftr__brandcol">
+        <a href={url('/')} aria-label={`${site.name} — home`}><Logo animate size={38} /></a>
+        <p class="ftr__pitch">{site.description}</p>
+        <ul class="ftr__contact">
+          <li><Icons name="mail" size={17} /><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>
+          <li><Icons name="phone" size={17} /><a href={site.contact.phoneHref}>{site.contact.phone}</a></li>
+          <li><Icons name="pin" size={17} /><span>{site.contact.address}</span></li>
+          <li><Icons name="clock" size={17} /><span>{site.contact.hours}</span></li>
+        </ul>
+      </div>
+
+      <div class="ftr__navs">
+        {site.footerNav.map((col) => (
+          <nav class="ftr__col" aria-label={col.title}>
+            <h2 class="ftr__coltitle">{col.title}</h2>
+            <ul>
+              {col.links.map((l) => <li><a href={url(l.href)}>{l.label}</a></li>)}
+            </ul>
+          </nav>
+        ))}
+      </div>
+
+      <div class="ftr__news">
+        <h2 class="ftr__coltitle">Field notes</h2>
+        <p class="ftr__newstext">
+          How we build, what we get wrong, and what it costs. Roughly monthly, no filler.
+        </p>
+        <NewsletterForm />
+      </div>
+    </div>
+
+    <div class="ftr__bottom">
+      <p class="ftr__legal">© {year} {site.legalName}. All rights reserved.</p>
+      <ul class="ftr__socials">
+        {site.socials.map((s) => (
+          <li><a href={s.href} rel="noopener noreferrer" target="_blank">{s.label}</a></li>
+        ))}
+      </ul>
+      <p class="ftr__made mono">Built, tested, refined, repeated — in {site.contact.city}.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    position: relative;
+    margin-top: var(--s-8);
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .ftr__inner { position: relative; z-index: 1; padding-block: var(--s-8) var(--s-6); }
+
+  /* --- Watermark --------------------------------------------------- */
+  .ftr__watermark {
+    position: absolute; right: -8%; bottom: -30%;
+    width: min(46rem, 78vw); aspect-ratio: 1;
+    pointer-events: none; opacity: 0.5;
+    mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 72%);
+  }
+  .ftr__wm-ring {
+    position: absolute; inset: calc(var(--i) * 9.5%);
+    border: 1px solid var(--line-2);
+    border-radius: 12%;
+    transform: rotate(calc(var(--i) * var(--droste-rotate) * 1.8));
+  }
+  .ftr__wm-ring:last-child { border-color: var(--accent); opacity: 0.55; }
+
+  /* --- Layout ------------------------------------------------------ */
+  .ftr__top { display: grid; gap: var(--s-7); }
+  @media (min-width: 900px) { .ftr__top { grid-template-columns: 1.25fr 1.4fr 1fr; } }
+
+  .ftr__pitch { color: var(--ink-2); font-size: var(--t-sm); margin-top: var(--s-4); max-width: 34ch; line-height: 1.65; }
+
+  .ftr__contact { list-style: none; padding: 0; margin: var(--s-5) 0 0; display: grid; gap: var(--s-3); }
+  .ftr__contact li { display: flex; gap: 0.7em; align-items: center; font-size: var(--t-sm); color: var(--ink-2); }
+  .ftr__contact :global(svg) { color: var(--accent); flex: none; }
+  .ftr__contact a:hover { color: var(--accent); }
+
+  .ftr__navs { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: var(--s-6); }
+  .ftr__coltitle {
+    font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500;
+    letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3);
+    margin-bottom: var(--s-4);
+  }
+  .ftr__col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.65em; }
+  .ftr__col a { font-size: var(--t-sm); color: var(--ink-2); transition: color var(--dur-1) var(--ease-out); }
+  .ftr__col a:hover { color: var(--accent); }
+
+  .ftr__newstext { font-size: var(--t-sm); color: var(--ink-2); margin-bottom: var(--s-4); max-width: 32ch; }
+
+  .ftr__bottom {
+    display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-6);
+    align-items: center; justify-content: space-between;
+    margin-top: var(--s-8); padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+    font-size: var(--t-xs); color: var(--ink-3);
+  }
+  .ftr__socials { display: flex; gap: var(--s-4); list-style: none; padding: 0; margin: 0; }
+  .ftr__socials a:hover { color: var(--accent); }
+  .ftr__made { letter-spacing: 0.03em; }
+</style>

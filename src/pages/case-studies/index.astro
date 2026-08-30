@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { getCaseStudies, getCaseSectors } from '../../data/case-studies.ts';
+
+const studies = await getCaseStudies();
+const sectors = await getCaseSectors();
+const [lead, ...rest] = studies;
+---
+<BaseLayout
+  title="Case studies"
+  path="/case-studies/"
+  description="How ErrorsFree scoped and shipped software for GCC businesses — the problem, what we built first, and what we told them not to build."
+>
+  <PageHero
+    eyebrow="Case studies"
+    title="The problem, the build, and what we got wrong."
+    lede="Written the way we would want to read them: what the brief said, what turned out to be true, and the parts we would do differently. Client names withheld where they are confidential."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <div class="filters" data-case-filters data-reveal>
+        <button type="button" class="filters__btn is-on" data-filter="all" aria-pressed="true">
+          All <span class="filters__count">{studies.length}</span>
+        </button>
+        {sectors.map((s) => (
+          <button type="button" class="filters__btn" data-filter={s.name} aria-pressed="false">
+            {s.name} <span class="filters__count">{s.count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid grid-md-2 cases" data-case-grid>
+        {lead && <div data-sector={lead.sector}><CaseCard study={lead} featured level={2} /></div>}
+        {rest.map((c, i) => <div data-sector={c.sector}><CaseCard study={c} index={i} level={2} /></div>)}
+      </div>
+
+      <p class="cases__empty" data-case-empty hidden>No case studies in that sector yet.</p>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Recognise your own problem in one of these?"
+    body="Bring us the problem rather than the specification. Working out what to build is the part we are best at."
+  />
+</BaseLayout>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-6); }
+  .filters__btn {
+    display: inline-flex; align-items: center; gap: 0.5em;
+    padding: 0.5em 1em; border-radius: var(--r-full);
+    border: 1px solid var(--line); background: var(--bg-2);
+    font-size: var(--t-sm); color: var(--ink-2);
+    transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
+  }
+  .filters__btn:hover { border-color: var(--line-2); color: var(--ink); }
+  .filters__btn.is-on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .filters__count { font-family: var(--font-mono); font-size: var(--t-xs); opacity: 0.65; }
+
+  .cases > * { min-width: 0; }
+  .cases > * > :global(.ccard) { height: 100%; }
+  .cases__empty { color: var(--ink-3); padding: var(--s-7) 0; text-align: center; }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('[data-case-filters]');
+  const grid = document.querySelector<HTMLElement>('[data-case-grid]');
+  const empty = document.querySelector<HTMLElement>('[data-case-empty]');
+
+  wrap?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+    if (!btn || !grid) return;
+    wrap.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    const want = btn.dataset.filter;
+    let shown = 0;
+    grid.querySelectorAll<HTMLElement>('[data-sector]').forEach((item) => {
+      const show = want === 'all' || item.dataset.sector === want;
+      item.hidden = !show;
+      if (show) shown++;
+    });
+    if (empty) empty.hidden = shown > 0;
+  });
+</script>

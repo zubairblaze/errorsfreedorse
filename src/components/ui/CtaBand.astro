@@ -1,0 +1,44 @@
+---
+import Icons from '../Icons.astro';
+import { site } from '../../data/site.ts';
+import { url } from '../../lib/url.ts';
+interface Props { title?: string; body?: string; }
+const {
+  title = 'Tell us what is slowing your business down.',
+  body = 'A 30-minute call, no charge and no deck. You leave with a straight answer on whether this is worth building — including if the answer is no.',
+} = Astro.props;
+---
+<section class="cta section">
+  <div class="wash" aria-hidden="true"></div>
+  <div class="shell">
+    <div class="cta__box brackets" data-reveal>
+      <h2 class="cta__title">{title}</h2>
+      <p class="lede cta__body">{body}</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary btn--lg" href={url('/contact/')}>
+          Book a consultation <Icons name="arrow" size={17} class="arrow" />
+        </a>
+        <a class="btn btn--ghost btn--lg" href={site.contact.whatsapp} rel="noopener noreferrer" target="_blank">
+          <Icons name="whatsapp" size={17} /> WhatsApp us
+        </a>
+      </div>
+      <p class="cta__meta mono">{site.contact.responseTime} · {site.contact.hours}</p>
+    </div>
+  </div>
+</section>
+<style>
+  .cta { position: relative; overflow: hidden; }
+  .cta__box {
+    position: relative; z-index: 1;
+    text-align: center;
+    max-width: 52rem; margin-inline: auto;
+    padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-5);
+  }
+  .cta__title { max-width: 18ch; margin-inline: auto; }
+  .cta__body { margin: var(--s-5) auto 0; max-width: 52ch; }
+  .cta__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; margin-top: var(--s-6); }
+  .cta__meta { margin-top: var(--s-5); font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.05em; }
+</style>

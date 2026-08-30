@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+.env
+.env.local
+errorsfree-site.zip
+local-test/
+errorsfree-local-test.zip
+shot*.mjs
+verify.mjs
+v2.mjs
+dbg.mjs
+
+# Generated photography — fetch with scripts/download-images.sh
+public/images/*.webp
+xampp-package/
+*-xampp.zip

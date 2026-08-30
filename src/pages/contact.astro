@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icons from '../components/Icons.astro';
+import { site } from '../data/site.ts';
+
+const channels = [
+  { icon: 'mail', label: 'Email', value: site.contact.email, href: `mailto:${site.contact.email}`, note: site.contact.responseTime },
+  { icon: 'whatsapp', label: 'WhatsApp', value: site.contact.whatsappLabel, href: site.contact.whatsapp, note: 'Fastest route to a person.' },
+  { icon: 'phone', label: 'Phone', value: site.contact.phone, href: site.contact.phoneHref, note: site.contact.hours },
+  { icon: 'pin', label: 'Based in', value: site.contact.address, href: null, note: 'Serving the GCC, remote-first.' },
+];
+---
+<BaseLayout
+  title="Contact"
+  path="/contact/"
+  description="Book a consultation with ErrorsFree. Email, WhatsApp or phone — we reply within one business hour, Sunday to Thursday."
+>
+  <PageHero
+    eyebrow="Contact"
+    title="Tell us what is slowing you down."
+    lede="A 30-minute call, no charge. You leave with a straight answer on whether custom software is worth it for your situation — including if the answer is no."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="shell">
+      <div class="contact">
+        <div class="contact__form card" data-reveal>
+          <h2 class="contact__h">Send a message</h2>
+          <p class="muted contact__sub">Fields marked with an asterisk are required.</p>
+          <ContactForm />
+        </div>
+
+        <aside class="contact__side">
+          <h2 class="contact__h" data-reveal>Or reach us directly</h2>
+          <ul class="channels">
+            {channels.map((c, i) => (
+              <li class="channel" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+                <span class="channel__icon"><Icons name={c.icon} size={19} /></span>
+                <div>
+                  <p class="channel__label mono">{c.label}</p>
+                  {c.href
+                    ? <a class="channel__value" href={c.href} rel="noopener noreferrer">{c.value}</a>
+                    : <p class="channel__value">{c.value}</p>}
+                  <p class="channel__note">{c.note}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div class="hours card" data-reveal>
+            <p class="hours__label mono">Working hours</p>
+            <p class="hours__value">{site.contact.hours}</p>
+            <p class="hours__note muted">
+              Outside these hours, WhatsApp still reaches us — we answer the next working morning.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact { display: grid; gap: var(--s-7); }
+  @media (min-width: 980px) { .contact { grid-template-columns: 1.35fr 1fr; gap: var(--s-8); align-items: start; } }
+
+  .contact__form { padding: clamp(1.5rem, 3vw, 2.5rem); }
+  .contact__h { font-size: var(--t-xl); }
+  .contact__sub { font-size: var(--t-sm); margin: 0.5em 0 var(--s-5); }
+
+  .channels { list-style: none; padding: 0; margin: var(--s-5) 0 var(--s-6); display: grid; gap: var(--s-4); }
+  .channel { display: flex; gap: var(--s-4); align-items: start; }
+  .channel__icon {
+    display: grid; place-items: center; width: 2.6rem; height: 2.6rem; flex: none;
+    border-radius: var(--r-3); background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--line);
+  }
+  .channel__label { font-size: var(--t-xs); letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3); }
+  .channel__value { display: block; font-weight: 600; font-size: var(--t-base); margin-top: 0.15em; color: var(--ink); }
+  a.channel__value:hover { color: var(--accent); }
+  .channel__note { font-size: var(--t-xs); color: var(--ink-3); margin-top: 0.2em; }
+
+  .hours__label { font-size: var(--t-xs); letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent); }
+  .hours__value { font-family: var(--font-display); font-weight: 600; font-size: var(--t-lg); letter-spacing: -0.02em; margin: 0.4em 0 0.5em; }
+  .hours__note { font-size: var(--t-sm); }
+</style>

@@ -1,0 +1,76 @@
+---
+/**
+ * Newsletter signup — Phase 1 is client-side only.
+ *
+ * PHASE 2: POST { email } to /api/subscribe and replace the simulated
+ * success path in the script below. Validation, states and markup stay
+ * exactly as they are.
+ */
+import Icons from './Icons.astro';
+---
+<form class="news" data-newsletter novalidate>
+  <div class="news__row">
+    <label class="visually-hidden" for="nl-email">Email address</label>
+    <input
+      class="news__input" id="nl-email" name="email" type="email"
+      inputmode="email" autocomplete="email" required
+      placeholder="you@company.com" aria-describedby="nl-msg" />
+    <button class="news__submit" type="submit" aria-label="Subscribe">
+      <Icons name="arrow" size={18} />
+    </button>
+  </div>
+  <p class="news__msg" id="nl-msg" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .news__row {
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-full);
+    transition: border-color var(--dur-2) var(--ease-out);
+  }
+  .news__row:focus-within { border-color: var(--accent); }
+  .news__input {
+    flex: 1; min-width: 0; background: none; border: 0; outline: none;
+    padding: 0.6em 0.9em; font-size: var(--t-sm); color: var(--ink);
+  }
+  .news__input::placeholder { color: var(--ink-3); }
+  .news__submit {
+    flex: none; display: grid; place-items: center;
+    width: 2.4rem; height: 2.4rem; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent);
+    transition: background-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+  }
+  .news__submit:hover { background: var(--accent-2); transform: translateX(2px); }
+  .news__msg { font-size: var(--t-xs); margin-top: 0.6em; min-height: 1.2em; color: var(--ink-3); }
+  .news__msg[data-state="error"] { color: #e5484d; }
+  .news__msg[data-state="ok"] { color: var(--accent); }
+</style>
+
+<script>
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-newsletter]')) {
+    const input = form.querySelector<HTMLInputElement>('input[type=email]')!;
+    const msg = form.querySelector<HTMLParagraphElement>('.news__msg')!;
+
+    const say = (text: string, state: 'ok' | 'error' | '') => {
+      msg.textContent = text;
+      if (state) msg.dataset.state = state; else delete msg.dataset.state;
+    };
+
+    input.addEventListener('input', () => say('', ''));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!EMAIL.test(value)) {
+        say('Please enter a valid email address.', 'error');
+        input.focus();
+        return;
+      }
+      // PHASE 2: await fetch('/api/subscribe', { method:'POST', body: JSON.stringify({ email: value }) })
+      say('Thanks — you are on the list.', 'ok');
+      form.reset();
+    });
+  }
+</script>

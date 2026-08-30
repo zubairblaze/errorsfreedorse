@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icons from '../../components/Icons.astro';
+import { services } from '../../data/services.ts';
+import { url, absUrl } from '../../lib/url.ts';
+import { site } from '../../data/site.ts';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+const { service } = Astro.props;
+const others = services.filter((s) => s.slug !== service.slug);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.title,
+  description: service.excerpt,
+  provider: { '@type': 'Organization', name: site.name, url: absUrl('/') },
+  areaServed: ['AE', 'SA', 'QA', 'KW', 'BH', 'OM'],
+  url: absUrl(`/services/${service.slug}/`),
+};
+---
+<BaseLayout
+  title={service.title}
+  path={`/services/${service.slug}/`}
+  description={service.excerpt}
+  jsonLd={jsonLd}
+>
+  <PageHero eyebrow={`Services · ${service.short}`} title={service.title} lede={service.intro}>
+    <div class="dhero__actions">
+      <a class="btn btn--primary btn--lg" href={url('/contact/')}>
+        Discuss this <Icons name="arrow" size={17} class="arrow" />
+      </a>
+      <a class="btn btn--ghost btn--lg" href={site.contact.whatsapp} rel="noopener noreferrer" target="_blank">
+        <Icons name="whatsapp" size={17} /> WhatsApp
+      </a>
+    </div>
+  </PageHero>
+
+  <!-- Engagement facts -->
+  <section class="facts">
+    <div class="shell">
+      <dl class="facts__grid">
+        {service.engagement.map((e, i) => (
+          <div class="facts__item" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <dt>{e.label}</dt><dd>{e.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section">
+    <div class="shell">
+      <h2 class="sec-title" data-reveal>How it works in practice</h2>
+      <div class="grid grid-sm-2 feat-grid">
+        {service.features.map((f, i) => (
+          <div class="card" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <h3>{f.title}</h3>
+            <p class="muted feat__body">{f.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <h2 class="sec-title" data-reveal>The engagement, step by step</h2>
+      <ol class="steps">
+        {service.process.map((p, i) => (
+          <li class="steps__item" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <span class="steps__n mono">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h3 class="steps__title">{p.step}</h3>
+              <p class="muted steps__body">{p.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Deliverables + stack -->
+  <section class="section">
+    <div class="shell">
+      <div class="two-col">
+        <div data-reveal>
+          <h2 class="sec-title">What you receive</h2>
+          <ul class="check-list">
+            {service.deliverables.map((d) => <li><Icons name="check" size={16} />{d}</li>)}
+          </ul>
+        </div>
+        <div data-reveal style="--reveal-delay:90ms">
+          <h2 class="sec-title">What we build it with</h2>
+          <ul class="tags">
+            {service.stack.map((t) => <li class="mono">{t}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Other services -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <h2 class="sec-title" data-reveal>Other services</h2>
+      <div class="grid grid-md-3">
+        {others.map((o, i) => (
+          <a class="card other" href={url(`/services/${o.slug}/`)} data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <h3 class="other__title">{o.title}</h3>
+            <p class="muted other__excerpt">{o.excerpt}</p>
+            <span class="other__go mono">Explore <Icons name="arrow" size={14} /></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .dhero__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+
+  .facts { border-block: 1px solid var(--line); background: var(--bg-2); padding-block: var(--s-6); }
+  .facts__grid { display: grid; gap: var(--s-5); margin: 0; }
+  @media (min-width: 760px) { .facts__grid { grid-template-columns: repeat(3, 1fr); } }
+  .facts__item { padding-inline-start: var(--s-4); border-inline-start: 2px solid var(--accent); }
+  .facts__item dt { font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--font-mono); }
+  .facts__item dd { margin: 0.35em 0 0; font-family: var(--font-display); font-weight: 600; font-size: var(--t-lg); letter-spacing: -0.02em; }
+
+  .sec-title { font-size: var(--t-2xl); margin-bottom: var(--s-6); }
+  .feat-grid > .card { display: grid; gap: var(--s-3); align-content: start; }
+  .feat__body { font-size: var(--t-sm); }
+
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-1); }
+  .steps__item { display: flex; gap: var(--s-5); padding: var(--s-5) 0; border-top: 1px solid var(--line); }
+  .steps__n { color: var(--accent); font-size: var(--t-sm); flex: none; padding-top: 0.25em; }
+  .steps__title { font-size: var(--t-lg); margin-bottom: 0.3em; }
+  .steps__body { font-size: var(--t-sm); max-width: 60ch; }
+
+  .two-col { display: grid; gap: var(--s-7); }
+  @media (min-width: 900px) { .two-col { grid-template-columns: 1.2fr 1fr; gap: var(--s-8); } }
+
+  .check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-3); }
+  .check-list li { display: flex; gap: 0.7em; align-items: start; color: var(--ink-2); font-size: var(--t-sm); }
+  .check-list :global(svg) { color: var(--accent); flex: none; margin-top: 0.2em; }
+
+  .tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .tags li { font-size: var(--t-xs); padding: 0.45em 0.9em; border: 1px solid var(--line); border-radius: var(--r-full); color: var(--ink-2); background: var(--bg-2); }
+
+  .other { display: flex; flex-direction: column; gap: var(--s-3); }
+  .other__title { font-size: var(--t-lg); }
+  .other__excerpt { font-size: var(--t-sm); flex: 1; }
+  .other__go { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+</style>

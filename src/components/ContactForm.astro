@@ -1,0 +1,213 @@
+---
+/**
+ * Contact form — Phase 1 validates and reports in the browser only.
+ *
+ * PHASE 2: point `action` at the API endpoint and replace the simulated
+ * success branch in the script. The field names below are already the
+ * column names for a `contact_submissions` table:
+ *   id, name, email, company, service, budget, message, created_at
+ */
+import Icons from './Icons.astro';
+import { services } from '../data/services.ts';
+---
+<form class="cf" data-contact-form novalidate>
+  <div class="cf__row">
+    <div class="cf__field">
+      <label for="cf-name">Your name <span aria-hidden="true">*</span></label>
+      <input id="cf-name" name="name" type="text" autocomplete="name" required
+             aria-describedby="cf-name-err" />
+      <p class="cf__err" id="cf-name-err" data-err-for="name"></p>
+    </div>
+    <div class="cf__field">
+      <label for="cf-email">Email <span aria-hidden="true">*</span></label>
+      <input id="cf-email" name="email" type="email" inputmode="email" autocomplete="email" required
+             aria-describedby="cf-email-err" />
+      <p class="cf__err" id="cf-email-err" data-err-for="email"></p>
+    </div>
+  </div>
+
+  <div class="cf__row">
+    <div class="cf__field">
+      <label for="cf-company">Company</label>
+      <input id="cf-company" name="company" type="text" autocomplete="organization" />
+    </div>
+    <div class="cf__field">
+      <label for="cf-service">What do you need?</label>
+      <select id="cf-service" name="service">
+        <option value="">Not sure yet</option>
+        {services.map((s) => <option value={s.slug}>{s.title}</option>)}
+        <option value="other">Something else</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cf__field">
+    <label for="cf-budget">Indicative budget</label>
+    <select id="cf-budget" name="budget">
+      <option value="">Prefer to discuss</option>
+      <option value="under-15k">Under AED 15,000</option>
+      <option value="15-50k">AED 15,000 – 50,000</option>
+      <option value="50-150k">AED 50,000 – 150,000</option>
+      <option value="over-150k">Over AED 150,000</option>
+    </select>
+  </div>
+
+  <div class="cf__field">
+    <label for="cf-message">What are you trying to fix? <span aria-hidden="true">*</span></label>
+    <textarea id="cf-message" name="message" rows="5" required
+              placeholder="The problem, roughly what it costs you today, and when you would like it solved."
+              aria-describedby="cf-message-err"></textarea>
+    <p class="cf__err" id="cf-message-err" data-err-for="message"></p>
+  </div>
+
+  <!-- Honeypot: bots fill it, humans never see it. -->
+  <div class="cf__trap" aria-hidden="true">
+    <label for="cf-website">Website</label>
+    <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="cf__submit">
+    <button class="btn btn--primary btn--lg" type="submit" data-cf-submit>
+      <span class="cf__spinner" aria-hidden="true" hidden>
+        <span class="cf__spin-ring" style="--i:0"></span>
+        <span class="cf__spin-ring" style="--i:1"></span>
+        <span class="cf__spin-ring" style="--i:2"></span>
+      </span>
+      <span data-cf-label>Send message</span>
+      <Icons name="arrow" size={17} class="arrow" />
+    </button>
+    <p class="cf__note">We reply within one business hour, Sunday to Thursday.</p>
+  </div>
+
+  <p class="cf__status" role="status" aria-live="polite" data-cf-status></p>
+</form>
+
+<style>
+  .cf { display: grid; gap: var(--s-5); }
+  .cf__row { display: grid; gap: var(--s-5); }
+  @media (min-width: 640px) { .cf__row { grid-template-columns: 1fr 1fr; } }
+
+  .cf__field { display: grid; gap: 0.45em; }
+  .cf__field label { font-size: var(--t-sm); font-weight: 500; color: var(--ink); }
+  .cf__field label span { color: var(--accent); }
+
+  .cf__field input, .cf__field select, .cf__field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-3);
+    padding: 0.8em 1em;
+    font-size: var(--t-sm);
+    color: var(--ink);
+    outline: none;
+    transition: border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+  }
+  .cf__field textarea { resize: vertical; min-height: 8rem; }
+  .cf__field input:focus, .cf__field select:focus, .cf__field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(var(--glow) / 0.18);
+  }
+  .cf__field [aria-invalid="true"] { border-color: #e5484d; }
+  .cf__field ::placeholder { color: var(--ink-3); }
+
+  .cf__err { font-size: var(--t-xs); color: #e5484d; min-height: 1em; }
+  .cf__trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .cf__submit { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; }
+  .cf__note { font-size: var(--t-xs); color: var(--ink-3); }
+  .cf__status { font-size: var(--t-sm); }
+  .cf__status[data-state="ok"] { color: var(--accent); }
+  .cf__status[data-state="error"] { color: #e5484d; }
+
+  /* Submitting state uses the recursive spinner: nested rings, each
+     turning a little slower than the one outside it. */
+  .cf__spinner { position: relative; width: 1.1em; height: 1.1em; display: inline-block; flex: none; }
+  .cf__spin-ring {
+    position: absolute; inset: calc(var(--i) * 22%);
+    border: 1.5px solid currentColor; border-top-color: transparent;
+    border-radius: 50%; opacity: calc(1 - var(--i) * 0.22);
+    animation: cf-spin calc(0.7s + var(--i) * 0.35s) linear infinite;
+  }
+  @keyframes cf-spin { to { transform: rotate(360deg); } }
+  button[data-busy] { pointer-events: none; opacity: 0.75; }
+</style>
+
+<script>
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-contact-form]')) {
+    const status = form.querySelector<HTMLElement>('[data-cf-status]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-cf-submit]')!;
+    const spinner = form.querySelector<HTMLElement>('.cf__spinner')!;
+    const label = form.querySelector<HTMLElement>('[data-cf-label]')!;
+
+    const setError = (name: string, message: string) => {
+      const field = form.querySelector<HTMLElement>(`[name="${name}"]`);
+      const slot = form.querySelector<HTMLElement>(`[data-err-for="${name}"]`);
+      if (slot) slot.textContent = message;
+      field?.setAttribute('aria-invalid', message ? 'true' : 'false');
+    };
+
+    const validate = () => {
+      const data = new FormData(form);
+      const errors: Record<string, string> = {};
+
+      const name = String(data.get('name') ?? '').trim();
+      if (name.length < 2) errors.name = 'Please tell us your name.';
+
+      const email = String(data.get('email') ?? '').trim();
+      if (!EMAIL.test(email)) errors.email = 'Please enter a valid email address.';
+
+      const message = String(data.get('message') ?? '').trim();
+      if (message.length < 12) errors.message = 'A sentence or two about the problem, please.';
+
+      for (const field of ['name', 'email', 'message']) setError(field, errors[field] ?? '');
+      return { ok: Object.keys(errors).length === 0, errors };
+    };
+
+    // Clear a field's error as soon as the visitor starts fixing it.
+    form.addEventListener('input', (e) => {
+      const el = e.target as HTMLElement;
+      const name = el.getAttribute('name');
+      if (name && el.getAttribute('aria-invalid') === 'true') setError(name, '');
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = '';
+      delete status.dataset.state;
+
+      // Honeypot tripped — pretend it worked, drop it on the floor.
+      if (String(new FormData(form).get('website') ?? '')) {
+        status.textContent = 'Thanks — your message has been sent.';
+        status.dataset.state = 'ok';
+        form.reset();
+        return;
+      }
+
+      const { ok, errors } = validate();
+      if (!ok) {
+        status.textContent = 'Please correct the highlighted fields.';
+        status.dataset.state = 'error';
+        form.querySelector<HTMLElement>(`[name="${Object.keys(errors)[0]}"]`)?.focus();
+        return;
+      }
+
+      submit.toggleAttribute('data-busy', true);
+      spinner.hidden = false;
+      label.textContent = 'Sending';
+
+      // PHASE 2 — replace this block with:
+      //   const res = await fetch('/api/contact', { method: 'POST', body: new FormData(form) });
+      //   if (!res.ok) throw new Error(await res.text());
+      await new Promise((r) => setTimeout(r, 650));
+
+      submit.removeAttribute('data-busy');
+      spinner.hidden = true;
+      label.textContent = 'Send message';
+      status.textContent = 'Thanks — your message has been sent. We reply within one business hour.';
+      status.dataset.state = 'ok';
+      form.reset();
+    });
+  }
+</script>

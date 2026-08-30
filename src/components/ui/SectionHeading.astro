@@ -1,0 +1,18 @@
+---
+import Icons from '../Icons.astro';
+interface Props { eyebrow?: string; title: string; lede?: string; align?: 'start' | 'center'; id?: string; }
+const { eyebrow, title, lede, align = 'start', id } = Astro.props;
+---
+<div class:list={['sh', align === 'center' && 'sh--center']} data-reveal>
+  {eyebrow && (
+    <p class="eyebrow"><Icons name="palette" size={13} />{eyebrow}</p>
+  )}
+  <h2 class="sh__title" id={id}>{title}</h2>
+  {lede && <p class="lede sh__lede">{lede}</p>}
+</div>
+<style>
+  .sh { max-width: 46rem; }
+  .sh--center { margin-inline: auto; text-align: center; }
+  .sh__title { margin-top: var(--s-3); }
+  .sh__lede { margin-top: var(--s-4); }
+</style>

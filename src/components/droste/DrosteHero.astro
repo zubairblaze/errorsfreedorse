@@ -1,0 +1,67 @@
+---
+/**
+ * The signature hero visual: an infinite Droste zoom.
+ *
+ * The site's own window, containing itself, containing itself — falling
+ * toward you as the page scrolls and drifting slowly even when it does not.
+ * The frames recycle, so it never bottoms out.
+ */
+import DrosteZoom from './DrosteZoom.astro';
+
+interface Props { class?: string; }
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['dhero', className]}>
+  <div class="dhero__halo" aria-hidden="true"></div>
+
+  <div class="dhero__stage">
+    <DrosteZoom levels={7} ratio={0.62} rotate={7} driver="viewport" span={2.1} drift={0.03} />
+  </div>
+
+  <p class="dhero__caption mono" aria-hidden="true">
+    <span class="dhero__pulse"></span>scroll to fall through · verified at every level
+  </p>
+</div>
+
+<style>
+  .dhero { position: relative; width: 100%; }
+
+  .dhero__halo {
+    position: absolute; inset: -22% -14% -10%;
+    background: radial-gradient(ellipse 58% 54% at 50% 46%, rgb(var(--glow) / 0.20), transparent 68%);
+    pointer-events: none;
+    filter: blur(8px);
+  }
+
+  .dhero__stage {
+    position: relative;
+    aspect-ratio: 4 / 3.4;
+    /* Clips the frames that grow past the viewer, which is what sells the
+       sense of passing through them rather than watching them inflate. */
+    overflow: hidden;
+    border-radius: var(--r-5);
+    mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 62%, transparent 99%);
+  }
+
+  .dhero__caption {
+    margin-top: var(--s-4);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex; align-items: center; gap: 0.6em;
+  }
+  .dhero__pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    animation: dhero-pulse 2.6s var(--ease-out) infinite;
+  }
+  @keyframes dhero-pulse {
+    0%   { box-shadow: 0 0 0 0 rgb(var(--glow) / 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgb(var(--glow) / 0); }
+    100% { box-shadow: 0 0 0 0 rgb(var(--glow) / 0); }
+  }
+
+  @media (max-width: 900px) { .dhero__stage { aspect-ratio: 4 / 3.6; } }
+  @media (prefers-reduced-motion: reduce) { .dhero__pulse { animation: none; } }
+</style>
