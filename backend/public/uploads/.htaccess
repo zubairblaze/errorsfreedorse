@@ -1,0 +1,32 @@
+# Uploads are data, never code.
+#
+# If a malicious file ever reaches this directory despite the type checks in
+# Uploads.php, these rules stop the server executing it. Defence in depth:
+# the validation is the lock, this is the bars on the window.
+
+php_flag engine off
+
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Strip handlers that would otherwise run these as scripts.
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .shtml
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .shtml
+AddType text/plain .php .phtml .phps .cgi .pl .py .shtml
+
+# Serve only real image types from here.
+<FilesMatch "(?i)\.(jpe?g|png|gif|webp)$">
+  Require all granted
+</FilesMatch>
+<FilesMatch "(?i)\.(?!jpe?g$|png$|gif$|webp$)[a-z0-9]+$">
+  Require all denied
+</FilesMatch>
+
+Options -Indexes -ExecCGI

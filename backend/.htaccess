@@ -1,0 +1,4 @@
+# Nothing in backend/ outside public/ may ever be requested over HTTP.
+# This file is the backstop; the deploy layout puts only public/ in the
+# document root, so in a correct install these paths are unreachable anyway.
+Require all denied

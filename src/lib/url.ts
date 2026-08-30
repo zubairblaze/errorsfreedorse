@@ -28,3 +28,20 @@ export function url(path = '/'): string {
 export function absUrl(path = '/'): string {
   return ORIGIN + url(path);
 }
+
+/**
+ * Clamps text to a length search engines will actually show.
+ *
+ * Excerpts are written for cards, where 200+ characters reads fine; a meta
+ * description that long is truncated mid-word in results. Once Phase 2 lets
+ * editors write excerpts this stops being a copy problem and becomes a
+ * recurring one, so it is handled in code rather than by discipline.
+ * Cuts at a word boundary and only appends an ellipsis if it actually cut.
+ */
+export function metaDescription(text: string, max = 155): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\u2014-]+$/, '') + '…';
+}

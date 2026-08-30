@@ -1,0 +1,52 @@
+---
+import { url } from '../lib/url.ts';
+import Plate from './ui/Plate.astro';
+import type { CaseStudy } from '../data/case-studies.ts';
+interface Props { study: CaseStudy; index?: number; level?: 2 | 3; featured?: boolean; }
+const { study, index = 0, level = 3, featured = false } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+<article class:list={['card ccard', featured && 'ccard--featured']} data-reveal style={`--reveal-delay:${index * 70}ms`}>
+  <div class="ccard__thumb">
+    <Plate image={study.featured_image} alt={study.featured_image_alt} seed={study.id + 2}
+           loading={featured ? 'eager' : 'lazy'} />
+  </div>
+  <div class="ccard__body">
+    <p class="ccard__meta mono">
+      <span class="ccard__sector">{study.sector}</span>
+      <span aria-hidden="true">·</span><span>{study.duration}</span>
+    </p>
+    <Heading class="ccard__title">
+      <a href={url(`/case-studies/${study.slug}/`)}>{study.title}<span class="ccard__stretch"></span></a>
+    </Heading>
+    <p class="ccard__client mono">{study.client}</p>
+    <p class="ccard__excerpt">{study.excerpt}</p>
+    <dl class="ccard__results">
+      {study.results.slice(0, 3).map((r) => (
+        <div><dt>{r.label}</dt><dd>{r.value}</dd></div>
+      ))}
+    </dl>
+  </div>
+</article>
+<style>
+  .ccard { display: flex; flex-direction: column; padding: 0; gap: 0; overflow: hidden; }
+  .ccard__thumb { position: relative; aspect-ratio: 16 / 9; background: var(--bg-3); overflow: hidden; border-bottom: 1px solid var(--line); }
+  .ccard__body { padding: var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); flex: 1; }
+  .ccard__meta { display: flex; flex-wrap: wrap; gap: 0.5em; font-size: var(--t-xs); color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .ccard__sector { color: var(--accent); }
+  .ccard__title { margin: 0; font-size: var(--t-lg); line-height: 1.25; letter-spacing: -0.018em; }
+  .ccard__title a { color: var(--ink); }
+  .ccard__stretch { position: absolute; inset: 0; z-index: 2; }
+  .ccard__client { font-size: var(--t-xs); color: var(--ink-3); }
+  .ccard__excerpt { color: var(--ink-2); font-size: var(--t-sm); line-height: 1.6; flex: 1; }
+  .ccard__results { display: flex; flex-wrap: wrap; gap: var(--s-4); margin: 0; padding-top: var(--s-4); border-top: 1px solid var(--line); }
+  .ccard__results dt { font-size: var(--t-xs); color: var(--ink-3); }
+  .ccard__results dd { margin: 0.15em 0 0; font-family: var(--font-display); font-weight: 600; font-size: var(--t-base); }
+
+  @media (min-width: 900px) {
+    .ccard--featured { grid-column: span 2; flex-direction: row; }
+    .ccard--featured .ccard__thumb { aspect-ratio: auto; width: 46%; flex: none; border-bottom: 0; border-inline-end: 1px solid var(--line); }
+    .ccard--featured .ccard__body { justify-content: center; padding: var(--s-6); }
+    .ccard--featured .ccard__title { font-size: var(--t-2xl); }
+  }
+</style>

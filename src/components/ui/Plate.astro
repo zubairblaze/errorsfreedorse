@@ -1,0 +1,68 @@
+---
+/**
+ * Card artwork: the photograph when it has been downloaded, otherwise a
+ * generated nested-frame plate seeded from the record's id.
+ *
+ * The plate is not an apology for a missing image — it is the brand motif at
+ * card size, and a grid of them reads as deliberate. That is what makes it
+ * safe to ship before the photography lands.
+ */
+import { resolveImage, type ImageKey } from '../../lib/images.ts';
+
+interface Props {
+  /** Registry key, an uploaded path, or null. */
+  image?: string | null;
+  alt?: string;
+  /** Varies the plate's rotation so a grid of them is not uniform. */
+  seed?: number;
+  /** Eager for the first card above the fold. */
+  loading?: 'lazy' | 'eager';
+  class?: string;
+}
+const { image, alt = '', seed = 0, loading = 'lazy', class: className = '' } = Astro.props;
+
+// A leading slash means Phase 2 supplied a real path; anything else is a
+// Phase 1 registry key.
+const resolved = image
+  ? image.startsWith('/')
+    ? { src: image, alt, width: 1344, height: 768 }
+    : resolveImage(image as ImageKey)
+  : null;
+---
+{resolved ? (
+  <img
+    class:list={['plate__img', className]}
+    src={resolved.src}
+    alt={alt || resolved.alt}
+    width={resolved.width}
+    height={resolved.height}
+    loading={loading}
+    decoding="async"
+  />
+) : (
+  <div class:list={['plate', className]} style={`--seed:${seed}`} aria-hidden="true">
+    <span class="plate__ring" style="--i:0"></span>
+    <span class="plate__ring" style="--i:1"></span>
+    <span class="plate__ring" style="--i:2"></span>
+    <span class="plate__ring" style="--i:3"></span>
+  </div>
+)}
+
+<style>
+  .plate__img { width: 100%; height: 100%; object-fit: cover; }
+
+  .plate {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: radial-gradient(ellipse 70% 70% at 50% 45%, rgb(var(--glow) / 0.13), transparent 70%);
+  }
+  .plate__ring {
+    position: absolute; inset: calc(14% + var(--i) * 9%);
+    border: 1px solid var(--line-2); border-radius: 14%;
+    transform: rotate(calc((var(--i) + var(--seed)) * var(--droste-rotate)));
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .plate__ring:last-child { border-color: var(--accent); opacity: 0.7; }
+  :global(.card:hover) .plate__ring {
+    transform: rotate(calc((var(--i) + var(--seed)) * var(--droste-rotate) * 2)) scale(1.04);
+  }
+</style>

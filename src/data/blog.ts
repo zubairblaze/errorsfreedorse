@@ -17,6 +17,8 @@
    or template changes are required, and no visual redesign follows.
    ===================================================================== */
 
+import { apiGet, useApi } from '../lib/api.ts';
+
 export type PostStatus = 'draft' | 'published';
 
 export interface Author {
@@ -47,6 +49,10 @@ export interface Post {
   excerpt: string;
   /** Rendered HTML, exactly as a `body` LONGTEXT column would hold it. */
   body: string;
+  /**
+   * Image-registry key in Phase 1 (see lib/images.ts); an uploaded path in
+   * Phase 2. Null renders the generated nested-frame plate.
+   */
   featured_image: string | null;
   /** Alt text travels with the image; keep it populated in the CMS. */
   featured_image_alt: string;
@@ -84,7 +90,7 @@ const posts: Post[] = [
     slug: 'what-ai-actually-costs-an-sme',
     excerpt:
       'Token pricing is the smallest line on the invoice. Here is the real cost model for putting AI into a small business, and the three workflows where it reliably returns more than it takes.',
-    featured_image: null,
+    featured_image: 'blog-ai-cost',
     featured_image_alt: 'Abstract nested frames representing layered cost analysis',
     author_id: 1,
     category: 'AI',
@@ -124,7 +130,7 @@ const posts: Post[] = [
     slug: 'why-we-verify-everything-twice',
     excerpt:
       'Our name sets an expectation. Here is the three-layer review process behind it — automated, AI-assisted and human — and the specific classes of bug each layer is good at catching.',
-    featured_image: null,
+    featured_image: 'blog-verify',
     featured_image_alt: 'Nested review frames illustrating a layered quality process',
     author_id: 2,
     category: 'Engineering',
@@ -155,7 +161,7 @@ const posts: Post[] = [
     slug: 'build-buy-or-leave-it-alone',
     excerpt:
       'A development studio telling you when not to hire a development studio. Four questions that decide whether a problem deserves custom software, an off-the-shelf subscription, or nothing at all.',
-    featured_image: null,
+    featured_image: 'blog-build-buy',
     featured_image_alt: 'Decision paths rendered as nested geometric frames',
     author_id: 1,
     category: 'SME Playbook',
@@ -187,7 +193,7 @@ const posts: Post[] = [
     slug: 'shipping-bilingual-software-gcc',
     excerpt:
       'Right-to-left is not a stylesheet toggle. The layout, data, typography and testing decisions that make bilingual products work in the Gulf — from a team that has got them wrong before.',
-    featured_image: null,
+    featured_image: 'blog-bilingual',
     featured_image_alt: 'Mirrored nested frames representing bidirectional layout',
     author_id: 2,
     category: 'Engineering',
@@ -219,7 +225,7 @@ const posts: Post[] = [
     slug: 'how-we-scope-a-six-week-v1',
     excerpt:
       'Fixed timeline, variable scope. The cutting method we use to get a real application into a client’s hands in weeks — including the four categories of work we always defer.',
-    featured_image: null,
+    featured_image: 'blog-scoping',
     featured_image_alt: 'A spiral of nested frames narrowing to a single core',
     author_id: 1,
     category: 'Product',
@@ -259,7 +265,7 @@ const posts: Post[] = [
     slug: 'five-internal-tools-we-shipped',
     excerpt:
       'A tour of the products behind our second revenue line, what each one solves, and the pattern that decides which internal tool is worth turning into a product.',
-    featured_image: null,
+    featured_image: 'blog-internal-tools',
     featured_image_alt: 'Five nested product frames arranged in a recursive grid',
     author_id: 2,
     category: 'Product',
@@ -288,20 +294,37 @@ const posts: Post[] = [
 ];
 
 /* ------------------------------- API -------------------------------
-   Async by design. Phase 2 replaces only these bodies with fetch().
+   These accessors were written async from day one so Phase 2 would be a
+   change of transport, not of structure. That is now the case: with
+   EF_API_URL set they read from the MySQL-backed API, and every page,
+   component and template below them is untouched.
    ------------------------------------------------------------------- */
+
+/** Cached for the life of a build so one API call serves every page. */
+let apiPosts: Post[] | null = null;
+
+async function livePosts(): Promise<Post[]> {
+  if (apiPosts === null) {
+    apiPosts = await apiGet<Post[]>('posts');
+  }
+  return apiPosts;
+}
+
+async function source(): Promise<Post[]> {
+  return useApi() ? await livePosts() : posts;
+}
 
 const published = (p: Post) => p.status === 'published';
 const byDateDesc = (a: Post, b: Post) => +new Date(b.published_at) - +new Date(a.published_at);
 
 /** All published posts, newest first. */
 export async function getPosts(): Promise<Post[]> {
-  return posts.filter(published).sort(byDateDesc);
+  return (await source()).filter(published).sort(byDateDesc);
 }
 
 /** One post by slug, or null. Returns drafts only in dev. */
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  return posts.find((p) => p.slug === slug && published(p)) ?? null;
+  return (await source()).find((p) => p.slug === slug && published(p)) ?? null;
 }
 
 /** Posts sharing a category or tag, excluding the current post. */
@@ -318,7 +341,8 @@ export async function getRelatedPosts(post: Post, limit = 3): Promise<Post[]> {
 }
 
 export async function getAuthor(id: number): Promise<Author> {
-  return authors.find((a) => a.id === id) ?? authors[1]!;
+  const all = useApi() ? await apiGet<Author[]>('authors') : authors;
+  return all.find((a) => a.id === id) ?? all[all.length - 1] ?? authors[1]!;
 }
 
 /** Categories that have at least one published post, with counts. */

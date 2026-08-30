@@ -83,7 +83,7 @@ const ok=(c,m)=>{ if(!c) fail.push(m); console.log((c?'  PASS  ':'  FAIL  ')+m);
 }
 
 // ---- Structure & SEO ----------------------------------------------
-const pages=['/','/about/','/services/','/services/ai-integration/','/work/','/blog/','/blog/what-ai-actually-costs-an-sme/','/contact/','/privacy/','/terms/'];
+const pages=['/','/about/','/services/','/services/ai-integration/','/work/','/case-studies/','/case-studies/retail-group-stock-operations/','/blog/','/blog/what-ai-actually-costs-an-sme/','/contact/','/privacy/','/terms/'];
 for (const path of pages) {
   const page=await b.newPage({viewport:{width:1280,height:900}});
   await page.goto(`http://localhost:4602/errorsfree${path}`,{waitUntil:'networkidle'});

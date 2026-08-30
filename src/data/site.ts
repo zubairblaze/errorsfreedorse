@@ -34,6 +34,7 @@ export const site = {
   /** Header navigation. Order is the order rendered. */
   nav: [
     { label: 'Services', href: '/services/' },
+    { label: 'Case Studies', href: '/case-studies/' },
     { label: 'Work', href: '/work/' },
     { label: 'About', href: '/about/' },
     { label: 'Blog', href: '/blog/' },
@@ -54,6 +55,7 @@ export const site = {
       title: 'Company',
       links: [
         { label: 'About', href: '/about/' },
+        { label: 'Case Studies', href: '/case-studies/' },
         { label: 'Our Work', href: '/work/' },
         { label: 'Blog', href: '/blog/' },
         { label: 'Contact', href: '/contact/' },

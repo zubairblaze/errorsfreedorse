@@ -213,6 +213,22 @@ src/
 
 ---
 
+## Backend and admin panel
+
+Phase 2 is built and tested: PHP 8 + MySQL, an admin panel at `/admin/` for
+blog posts, case studies, vibe-coded apps and services, and a JSON API the
+static site reads at build time.
+
+```bash
+EF_API_URL=https://errorsfree.com/api/ npm run build   # build from MySQL
+npm run build                                          # build from fixtures
+```
+
+Without `EF_API_URL` the site builds from `src/data`, so a broken backend
+cannot block a deploy. See **[backend/README.md](backend/README.md)** for
+setup, deployment and the security model — including what is deliberately
+not implemented.
+
 ## Phase 2 wiring
 
 The front end was written against the planned schema, so going live on the
